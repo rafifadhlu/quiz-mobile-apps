@@ -32,6 +32,8 @@ class UserCreateSerializerTests(TestCase):
         self.user_data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
+            'first_name' : 'test',
+            'last_name' : 'newuser',
             'password': 'newpassword'
         }
 

@@ -1,6 +1,6 @@
 
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from rest_framework.test import APITestCase
 from accounts.views import UserViewSet
 
@@ -25,7 +25,6 @@ class UserViewSetTest(TestCase):
         })
         self.assertEqual(res.status_code, 401)
 
-
 class UserCreateViewTest(APITestCase):
     """
     User Registration View TestCase /auth/register/
@@ -34,8 +33,11 @@ class UserCreateViewTest(APITestCase):
         self.user_data = {
             'username': 'testuser',
             'email': 'testuser@example.com',
+            'first_name' :'test',
+            'last_name' : 'newuser',
             'password': 'testpassword'
         }
+        group = Group.objects.create(name='Students')
 
     def test_user_success_registration(self):
         res = self.client.post('/api/v1/auth/register/', self.user_data)
@@ -75,7 +77,6 @@ class UserRefreshTokenViewTest(APITestCase):
             'refreshToken': refreshToken
         })
         self.assertEqual(res.data['detail'], "Invalid or expired refresh token")
-
 
 class UserBlackListTokenViewTest(APITestCase):
     def setUp(self):
