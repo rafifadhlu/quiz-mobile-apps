@@ -48,11 +48,12 @@ class UserAddClassroomMemberSerializer(serializers.Serializer):
             ).values_list('student_id', flat=True)
         )
 
-        if existing_student_ids:
-            raise serializers.ValidationError(
-                f"Students {list(existing_student_ids)} are already in this classroom"
-            )
+        duplicates = [s for s in value if s in existing_student_ids]
 
+        if duplicates:
+            raise serializers.ValidationError(
+                f"Students {duplicates} are already in this classroom"
+            )
         return value
 
     def create(self, validated_data):
@@ -63,7 +64,6 @@ class UserAddClassroomMemberSerializer(serializers.Serializer):
         for student_id in validated_data.get("students", []):
             student = User.objects.get(id=student_id)
             classroom_member.objects.create(classroom=classroom_instance, student=student)
-            
 
         return validated_data
 
@@ -98,3 +98,30 @@ class UserCandidateClassroomSerializer(serializers.ModelSerializer):
     def get_is_joined(self, obj):
         classroom_id = self.context.get("classroom_id")
         return classroom_member.objects.filter(classroom=classroom_id, student=obj).exists()
+    
+class UserRemoveClassroomMemberSerializer(serializers.Serializer):
+    """
+    Serializer for removing a user from a classroom.
+    """
+    students = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False
+    )
+
+    def validate_students(self, value):
+        classroom_id = self.context.get("classroom_id")
+
+        # Get all existing student IDs in this classroom
+        existing_student_ids = set(
+            classroom_member.objects.filter(
+                classroom_id=classroom_id
+            ).values_list('student_id', flat=True)
+        )
+
+        invalid = [s for s in value if s not in existing_student_ids]
+        if invalid:
+            raise serializers.ValidationError(
+                f"Students {invalid} are not in this classroom"
+            )
+        
+        return value
