@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group, User
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework.response import Response
@@ -9,9 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserListClassroomSerializer,UserCreateClassroomSerializer,UserAddClassroomMemberSerializer,UserClassroomMemberSerializer,UserCandidateClassroomSerializer,UserRemoveClassroomMemberSerializer
 
 from .permissions import IsStudent,IsTeacher
-from .models import classroom, classroom_member
-
 from rest_framework.permissions import IsAuthenticated
+
+from .models import classroom, classroom_member
+from django.contrib.auth.models import Group, User
 
 # Create your views here.
 
