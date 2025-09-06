@@ -10,10 +10,15 @@ pipeline {
             steps {
                 script {
                     // Setup steps go here
-                    sh 'echo "Setting up the environment...🔧🔧🔧"'
-                    sh "python3 -m venv ${VENV_DIR} && ./${VENV_DIR}/bin/activate"
-                    sh "cd backend && cd api && pip install -r requirements.txt "
-                    sh 'echo "Environment setup success and complete✅✅✅'
+                    sh '''
+                        echo "Setting up the environment... 🔧🔧🔧"
+                        cd backend
+                        python3 -m venv ${VENV_DIR}
+                        . ${VENV_DIR}/bin/activate
+                        cd api
+                        pip install -r requirements.txt
+                        echo "Environment setup success and complete ✅✅✅"
+                    '''
                 }
             }
         }
@@ -22,8 +27,13 @@ pipeline {
             steps {
                 script {
                     // Test steps go here
-                    sh 'echo "running test...🔍🔍🔍"'
-                    sh "cd backend && ./${VENV_DIR}/bin/activate && cd api && pytest"
+                    sh '''
+                        echo "Running tests... 🔍🔍🔍"
+                        cd backend
+                        . ${VENV_DIR}/bin/activate
+                        cd api
+                        pytest
+                    '''
                 }
             }
         }
