@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.12'  // official Python image
-        }
-        
-    }
+    agent any
 
     environment {
         VENV_DIR = 'venv'
