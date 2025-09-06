@@ -3,7 +3,6 @@ pipeline {
         docker {
             image 'python:3.12'  // official Python image
         }
-        
     }
 
     environment {
