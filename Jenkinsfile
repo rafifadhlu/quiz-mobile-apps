@@ -37,17 +37,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Build') {
-            steps {
-                script {
-                    def appName = 'quiz-app'
-                    def buildNumber = 1.0
-                    def imageTag = "${appName}:${buildNumber}"
-                    docker.build(imageTag)
-                }
-            }
-        }
-
     }
 }
