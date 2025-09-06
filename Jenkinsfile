@@ -30,15 +30,13 @@ pipeline {
                     sh '''
                         echo "Running tests... 🔍🔍🔍"
                         cd backend
-                        . ${VENV_DIR}/bin/activat
+                        . ${VENV_DIR}/bin/activate
                         cd api
                         pytest
                     '''
                 }
             }
         }
-
-   
 
     }
 }
