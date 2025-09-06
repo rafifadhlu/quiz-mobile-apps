@@ -30,12 +30,24 @@ pipeline {
                     sh '''
                         echo "Running tests... 🔍🔍🔍"
                         cd backend
-                        . ${VENV_DIR}/bin/activate
+                        . ${VENV_DIR}/bin/activat
                         cd api
                         pytest
                     '''
                 }
             }
         }
+
+        stage('Build') {
+            steps {
+                script {
+                    def appName = 'quiz-app'
+                    def buildNumber = 1.0
+                    def imageTag = "${appName}:${buildNumber}"
+                    docker.build(imageTag)
+                }
+            }
+        }
+
     }
 }
