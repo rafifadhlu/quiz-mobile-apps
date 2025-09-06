@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.12'  // official Python image
+            args '-u root'       // optional: if you need root to install deps
+        }
+    }
 
     environment {
         VENV_DIR = 'venv'
