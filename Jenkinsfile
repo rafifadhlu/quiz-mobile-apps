@@ -11,8 +11,8 @@ pipeline {
                 script {
                     // Setup steps go here
                     sh 'echo "Setting up the environment...🔧🔧🔧"'
-                    sh "python3 -m venv ${VENV_DIR}"
-                    sh "cd backend && ./${VENV_DIR}/bin/activate && cd api && pip install -r requirements.txt "
+                    sh "python3 -m venv ${VENV_DIR} && ./${VENV_DIR}/bin/activate"
+                    sh "cd backend && cd api && pip install -r requirements.txt "
                     sh 'echo "Environment setup success and complete✅✅✅'
                 }
             }
