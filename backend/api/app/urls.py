@@ -19,9 +19,11 @@ from django.urls import path,include
 
 from accounts import urls as accountsUrl
 from classrooms import urls as classroomsUrl
+from quizzes import urls as quizzesUrl
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(accountsUrl,namespace='auth')),
-    path('api/v1/', include(classroomsUrl, namespace='classrooms'))
+    path('api/v1/', include(classroomsUrl, namespace='classrooms')),
+    path('api/v1/', include(quizzesUrl, namespace='quizzes'))
 ]

@@ -1,15 +1,17 @@
-from django.contrib.auth.models import Group, User
+from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics  import CreateAPIView,ListAPIView,UpdateAPIView
+from rest_framework.generics  import CreateAPIView,ListAPIView,UpdateAPIView,DestroyAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserListClassroomSerializer,UserCreateClassroomSerializer,UserAddClassroomMemberSerializer,UserClassroomMemberSerializer,UserCandidateClassroomSerializer
-from .permissions import IsStudent,IsTeacher
-from .models import classroom, classroom_member
+from .serializers import UserListClassroomSerializer,UserCreateClassroomSerializer,UserAddClassroomMemberSerializer,UserClassroomMemberSerializer,UserCandidateClassroomSerializer,UserRemoveClassroomMemberSerializer
 
+from .permissions import IsStudent,IsTeacher
 from rest_framework.permissions import IsAuthenticated
+
+from .models import classroom, classroom_member
+from django.contrib.auth.models import Group, User
 
 # Create your views here.
 
@@ -49,6 +51,22 @@ class UserCreateClassroomView(CreateAPIView):
                         data={"status" : status.HTTP_401_UNAUTHORIZED,
                             "detail": "Unauthorized!"})
     
+class UserDeleteClassroomView(DestroyAPIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+    queryset = classroom.objects.all()
+
+    def get_queryset(self): 
+        return classroom.objects.filter(teacher=self.request.user)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_200_OK,
+                        data={
+                            "status": status.HTTP_200_OK,
+                            "message": "Classroom deleted successfully."
+                        })
+
 class UserAddClassroomMemberView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsTeacher]
     serializer_class = UserAddClassroomMemberSerializer
@@ -63,7 +81,12 @@ class UserAddClassroomMemberView(CreateAPIView):
    
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED,
+                            data={
+                                "status": status.HTTP_201_CREATED,
+                                "message": "Successfully added members to the classroom.",
+                                "data": serializer.data
+                            })
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,4 +148,26 @@ class UserSeeCandidateClassroomView(ListAPIView):
                 "detail": "Data not found."
             }
         )
+
+class UserRemoveClassroomMemberView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
     
+    def get_queryset(self):
+        return classroom_member.objects.all()
+    
+    def delete(self, request,*args, **kwargs):
+        classroom_id = self.kwargs.get('classroom_id')
+        serializer = UserRemoveClassroomMemberSerializer(data=request.data, context={'classroom_id': classroom_id})
+
+        serializer.is_valid(raise_exception=True)
+        student_ids = serializer.validated_data.get('students', [])
+        self.get_queryset().filter(student_id__in=student_ids).delete()
+
+        return Response(status=status.HTTP_200_OK,
+                        data={
+                            "status": status.HTTP_200_OK,
+                            "message": f"Removed {len(student_ids)} students from classroom {classroom_id}.",
+                            "data" : {
+                                "member_removed" : student_ids
+                            }
+                        })

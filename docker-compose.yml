@@ -1,0 +1,10 @@
+services:
+  quiz-app:
+    image: quiz-app:1.0
+    build:
+      context: backend/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/api/.env.prod

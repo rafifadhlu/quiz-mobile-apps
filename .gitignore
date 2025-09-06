@@ -1,0 +1,46 @@
+# General
+*.log
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Django
+*.sqlite3
+db.sqlite3
+*.py[cod]
+*.env
+.envg
+.env*
+*.migrations/
+*.coverage
+*.pytest_cache/
+*.vscode/
+backend/api/staticfiles/
+backend/api/mediafiles/
+
+# Flutter
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/pubspec.lock
+**/.idea/
+**/.vscode/
+**/.android/
+**/.ios/
+**/macos/
+**/web/
+**/windows/
+**/linux/
+**/coverage/
+
+# Node.js (if used in Flutter web)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
