@@ -1,6 +1,6 @@
 from .base import *
 import os
-
+# from utils.supabaseFunc import get_signed_url
 
 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
@@ -23,8 +23,24 @@ DATABASES = {
     }
 }
 
-MEDIA_ROOT = BASE_DIR /'media'
-MEDIA_URL = '/media/'
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": os.getenv("SUPABASE_ACCESS_KEY"),
+            "secret_key": os.getenv("SUPABASE_SECRET_KEY"),
+            "bucket_name": os.getenv("SUPABASE_MEDIA_BUCKET"),
+            "endpoint_url": os.getenv("SUPABASE_S3_STORAGE_URL"),
+            "region_name": os.getenv("SUPABASE_REGION"),
+            "default_acl": "public-read",
+            "querystring_auth": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
