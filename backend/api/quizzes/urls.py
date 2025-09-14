@@ -1,7 +1,7 @@
 from django.urls import path
 
 
-from .views import UserQuizzesView,UserDeleteQuizzesView,UserQuestionsView,UserUpdateQuestions,UserDeleteQuestion
+from .views import UserQuizzesView,UserDeleteQuizzesView,UserQuestionsView,UserUpdateQuestions,UserDeleteQuestion,UserSubmitQuizzes,UserGetQuizzesResult
 
 app_name = 'quizzes'
 urlpatterns = [
@@ -14,5 +14,6 @@ urlpatterns = [
     path("classrooms/<int:classroom_id>/quizzes/<int:quiz_id>/questions/<int:question_id>/", UserDeleteQuestion.as_view(),name='delete-questions'), # GET and DELETE Question
 
     path("classrooms/<int:classroom_id>/quizzes/<int:quiz_id>/questions/<int:question_id>", UserUpdateQuestions.as_view(),name='update-questions'),
-    # path("classrooms/<int:classroom_id>/quizzes/<int:quiz_id>/result/", UserResultQuizzes.as_view(),name='delete-quiz'),
+    path("classrooms/<int:classroom_id>/quizzes/<int:quiz_id>/answer/", UserSubmitQuizzes.as_view(),name='submit-quiz'),
+    path("classrooms/<int:classroom_id>/quizzes/<int:pk>/result/", UserGetQuizzesResult.as_view(), name='quizzes-result'),
 ]

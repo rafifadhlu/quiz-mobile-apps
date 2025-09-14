@@ -3,8 +3,9 @@ from django.contrib.auth.models import Group, User
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics  import CreateAPIView,UpdateAPIView
+from rest_framework.generics  import CreateAPIView,UpdateAPIView,RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
 
 
 from .serializers import UserCreateSerializer,UserAuthSerializer,UserRefreshTokenSerializer, UserUpdateSerializer 
@@ -14,22 +15,30 @@ class UserViewSet(CreateAPIView):
     """
     API endpoint for user to log in, and get authentication tokens.
     """
+    permission_classes = [AllowAny]
     serializer_class = UserAuthSerializer
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            user = serializer.validated_data
+            user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
 
             return Response(status=status.HTTP_200_OK, data={
                 "status": status.HTTP_200_OK,
                 "message": "Login successful",
-                "data" :{
+                "data" :{   
                     "refresh": str(refresh), 
                     "access": str(refresh.access_token),
-                    "user": int(user.id)
+                    "user": {
+                        "id":user.id,
+                        "username":user.username,
+                        "email":user.email,
+                        "firstname":user.first_name,
+                        "lastname":user.last_name,
+                        "groups" : [g.name for g in user.groups.all()]
+                    }
                 }
             })
 
@@ -108,7 +117,7 @@ class UserBlackListTokenView(CreateAPIView):
                         data={"status": status.HTTP_200_OK,
                               "message": "Token blacklisted successfully"})
 
-class UserUpdateView(UpdateAPIView):
+class UserUpdateView(RetrieveUpdateAPIView):
     """
     API endpoint for updating user profile.
     """

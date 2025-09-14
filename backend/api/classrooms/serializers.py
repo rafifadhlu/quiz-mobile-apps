@@ -2,31 +2,17 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import classroom, classroom_member
 
-class UserListClassroomSerializer(serializers.ModelSerializer):
+class UserClassroomSerializer(serializers.ModelSerializer):
     """
     Serializer for listing users in a classroom.
     """
-
-    class Meta:
-        model = classroom
-        fields = ['id', 'class_name', 'teacher']
-
-class UserCreateClassroomSerializer(serializers.ModelSerializer):
-    """
-    Serializer for creating a new classroom.
-    """
-    # teacher = serializers.ChoiceField()
     class_name = serializers.CharField(max_length=20)
+    teacher = serializers.CharField()
 
     class Meta:
         model = classroom
         fields = ['id', 'class_name', 'teacher']
         read_only_fields = ['teacher']
-
-
-    # student_ids = serializers.ListField(
-    #     child=serializers.IntegerField()
-    # )
 
 class UserAddClassroomMemberSerializer(serializers.Serializer):
     """
@@ -99,29 +85,3 @@ class UserCandidateClassroomSerializer(serializers.ModelSerializer):
         classroom_id = self.context.get("classroom_id")
         return classroom_member.objects.filter(classroom=classroom_id, student=obj).exists()
     
-class UserRemoveClassroomMemberSerializer(serializers.Serializer):
-    """
-    Serializer for removing a user from a classroom.
-    """
-    students = serializers.ListField(
-        child=serializers.IntegerField(),
-        allow_empty=False
-    )
-
-    def validate_students(self, value):
-        classroom_id = self.context.get("classroom_id")
-
-        # Get all existing student IDs in this classroom
-        existing_student_ids = set(
-            classroom_member.objects.filter(
-                classroom_id=classroom_id
-            ).values_list('student_id', flat=True)
-        )
-
-        invalid = [s for s in value if s not in existing_student_ids]
-        if invalid:
-            raise serializers.ValidationError(
-                f"Students {invalid} are not in this classroom"
-            )
-        
-        return value

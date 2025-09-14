@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics  import CreateAPIView,ListAPIView,UpdateAPIView,DestroyAPIView,ListCreateAPIView
+from rest_framework.generics  import RetrieveAPIView,RetrieveUpdateAPIView,UpdateAPIView,DestroyAPIView,ListCreateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -22,7 +22,7 @@ from django.contrib.auth.models import Group, User
 
 from typing import Any
 
-from .serializer import UserQuizzesSerializer,QuestionsSerializer,UserQuestionsSerializer
+from .serializer import UserQuizzesSerializer,QuestionsSerializer,UserQuestionsSerializer,UserSubmitAnswerSerializer,QuizAttemptSerializer
 
 
 # Create your views here.
@@ -142,20 +142,19 @@ class UserQuestionsView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        self.perform_create(serializer)
+        serializer.save()
 
         return Response(
             {
                 "status": status.HTTP_201_CREATED,
                 "message": "Questions added successfully.",
-                "data": serializer.validated_data
+                "data": serializer.data
             },
             status=status.HTTP_201_CREATED,
         )
 
 
-class UserUpdateQuestions(UpdateAPIView):
+class UserUpdateQuestions(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated,IsTeacher]
     serializer_class = QuestionsSerializer
 
@@ -169,6 +168,19 @@ class UserUpdateQuestions(UpdateAPIView):
             quiz_id=quiz_id,
             quiz__classroom_id=classroom_id
         )
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        obj = self.get_object()
+        files_name = []
+        if obj.question_image:
+            files_name.append(obj.question_image.name)
+        if obj.question_audio:
+            files_name.append(obj.question_audio.name)
+
+        context['signed_url_map'] = get_signed_urls(files_name)
+
+        return context
 
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(
@@ -200,9 +212,8 @@ class UserDeleteQuestion(DestroyAPIView):
         return get_object_or_404(questions, id=question_id)
 
     def perform_destroy(self, instance):
-        path = instance.question_image.url
-        if path:
-            delete_file(path)
+        if instance.question_image:
+            delete_file(instance.question_image.url)
         
         return super().perform_destroy(instance) 
     
@@ -212,8 +223,7 @@ class UserDeleteQuestion(DestroyAPIView):
         deleted_data = {
             "id": instance.id,
             "question_text": instance.question_text,  # adjust field names as needed
-            "question_image": instance.question_image.url if instance.question_image else None,
-            # Add other fields you want to return
+            "question_image": instance.question_image if instance.question_image else None,
         }
         
 
@@ -225,5 +235,36 @@ class UserDeleteQuestion(DestroyAPIView):
                             "data": deleted_data
                         })
 
-
+class UserSubmitQuizzes(ListCreateAPIView):
+    permission_classes = [IsAuthenticated,IsStudent,IsTeacher]
+    serializer_class = UserSubmitAnswerSerializer
     
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        return context
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "status": status.HTTP_202_ACCEPTED,
+                "message": "Answer Submit successfully",
+                "data" : serializer.data
+            }
+        )
+
+class UserGetQuizzesResult(RetrieveAPIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+    serializer_class = QuizAttemptSerializer  # You'll need a serializer
+
+    def get_object(self):
+        quiz_id = self.kwargs.get("pk")
+        classroom_id = self.kwargs.get("classroom_id")
+
+        return get_object_or_404(
+            QuizAttempt, quiz_id=quiz_id, quiz__classroom_id=classroom_id
+        )

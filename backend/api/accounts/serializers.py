@@ -6,10 +6,14 @@ from django.contrib.auth import authenticate
 class UserAuthSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    
+    role = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="name"  # show group names instead of IDs
+    )
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ['username', 'password','role']
 
     def validate_username(self, value):
         if not value:
@@ -25,11 +29,14 @@ class UserAuthSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
+        print(f"Attempting to authenticate with: {data}")
+
         user = authenticate(**data)
         if user is None:
             raise serializers.ValidationError("Invalid credentials")
-        
-        return user
+        data['user'] = user
+
+        return data
 
 class UserCreateSerializer(serializers.ModelSerializer):
 
@@ -64,6 +71,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists")
         return value
+    
+    def validate_username(self, value):
+        if not value:
+            raise serializers.ValidationError("Username is required")
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists")
+        return value
+
 
     class Meta:
         model = User
@@ -94,4 +109,4 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['username','first_name', 'last_name', 'email']

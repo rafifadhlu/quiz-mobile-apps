@@ -1,7 +1,7 @@
 from operator import index
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import quizzes,questions,choices,student_answers
+from .models import quizzes,questions,choices,student_answers,QuizAttempt
 import json
 
 class UserQuizzesSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class ChoicesSerializer(serializers.ModelSerializer):
         fields = ['id','choice_text','is_correct']
 
 class QuestionsSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required=False)
+    # id = serializers.IntegerField(required=False)
     choices = ChoicesSerializer(many=True, write_only=True)
     question_image = serializers.ImageField(required=False, allow_null=True,write_only=True)
     question_audio = serializers.FileField(required=False, allow_null=True,write_only=True)
@@ -151,4 +151,85 @@ class UserQuestionsSerializer(serializers.Serializer):
             created_questions.append(question_instance)
 
         return created_questions
+    
+
+class UserSubmitAnswerSerializer(serializers.ModelSerializer):
+
+    quiz_id = serializers.IntegerField(write_only=True)
+    question_id = serializers.IntegerField(write_only=True)
+    answer_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = student_answers
+        fields = ['quiz_id', 'question_id', 'answer_id', 'answer', 'is_correct']
+        read_only_fields = ['answer', 'is_correct']
+
+    def validate(self, data):
+        # Validate quiz, question, and choice existence
+        quiz = quizzes.objects.get(id=data["quiz_id"])
+        if not quiz:
+            raise serializers.ValidationError({"quiz_id": "Quiz not found."})
+
+        question = questions.objects.get(id=data["question_id"], quiz_id=quiz.id)
+
+        if not question:
+            raise serializers.ValidationError({"question_id": "Question not found or not in this quiz."})
+
+        choice = choices.objects.get(id=data["answer_id"], question=question)
+
+        if not choice:
+            raise serializers.ValidationError({"answer_id": "Answer not found or not for this question."})
+
+        # attach objects to serializer for reuse in create()
+        data["quiz"] = quiz
+        data["question"] = question
+        data["choice"] = choice
+        return data
+
+    def create(self, validated_data):
+        user = self.context["user"]
+        quiz = validated_data["quiz"]
+        question = validated_data["question"]
+        choice = validated_data["choice"]
+
+        attempt, create = QuizAttempt.objects.get_or_create(
+            student=user,
+            quiz=quiz
+        )
+
+        obj, created = student_answers.objects.update_or_create(
+            question=question,
+            quiz_attempt=attempt,
+            defaults={
+                "answer":choice,
+                "is_correct":choice.is_correct
+            }
+        )
+
+        get_all_count_questions = student_answers.objects.filter(
+                quiz_attempt_id=attempt,
+            ).count() 
+        
+        get_correct_questions = student_answers.objects.filter(
+                quiz_attempt_id=attempt,
+                is_correct = True
+            ).count()
+
+        attempt.score = (get_correct_questions/get_all_count_questions)*100 
+        attempt.save()
+
+        return obj
+        
+
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizAttempt
+        fields = "__all__"
+
+    
+
+    
+
+
+
 

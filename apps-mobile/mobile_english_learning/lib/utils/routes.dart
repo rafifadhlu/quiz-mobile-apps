@@ -1,0 +1,123 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile_english_learning/utils/shared_prefs.dart';
+
+//main layout
+import 'package:mobile_english_learning/views/main_layout.dart';
+
+//Screens
+import 'package:mobile_english_learning/views/auth/login_screen.dart';
+import 'package:mobile_english_learning/views/auth/register_screen.dart';
+import 'package:mobile_english_learning/views/home_screen.dart';
+
+//viewmodels
+import 'package:mobile_english_learning/viewmodels/auth/auth_view_models.dart';
+import 'package:mobile_english_learning/viewmodels/auth/app_state_view_models.dart';
+import 'package:mobile_english_learning/viewmodels/auth/register_view_models.dart';
+
+GoRouter Createrouters(AuthViewModel authViewModel,
+AppStateViewModel appStateViewModel,
+RegisterViewModel registerViewModel,
+ClassroomViewsModels classroomViewModel){
+
+  return GoRouter(
+    refreshListenable: Listenable.merge([authViewModel, appStateViewModel,registerViewModel,classroomViewModel]),
+    redirect: (context, state) {
+      final isLoggedIn = authViewModel.isLoggedIn;
+      final isFreshOpen = appStateViewModel.isFreshOpen;
+      final isLoginPage = state.matchedLocation == '/login';
+      final isRegisterPage = state.matchedLocation == '/register';
+      
+      
+      debugPrint('Redirect check - isLoggedIn: $isLoggedIn, currentPath: ${state.matchedLocation}');
+      debugPrint('Redirecting to login after logout. isFreshOpen: $isFreshOpen');
+
+       if (!isLoggedIn && !isLoginPage && !isFreshOpen && !isRegisterPage ) {
+          debugPrint('Redirecting to login after logout. isFreshOpen: $isFreshOpen');
+          return '/login';
+        }
+      // If logged in and on login page, redirect to home
+      if (isLoggedIn && isLoginPage) {
+        debugPrint('Redirecting to home - user already authenticated');
+        return '/';
+      }
+
+      return null;
+    },
+    routes: [
+        GoRoute( 
+          path: '/', 
+          builder: (context, state) {
+            return authViewModel.isLoggedIn
+            ? const MainLayout()   // <-- navbar stays forever
+            : appStateViewModel.isFreshOpen
+                ? HomeScreen()
+                : AuthScreen();
+              },),
+        GoRoute(
+          path: '/login',
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+                key: state.pageKey,
+                child: AuthScreen(),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  final offsetTween =
+                      Tween(begin: const Offset(1, 0), end: Offset.zero)
+                          .chain(CurveTween(curve: Curves.easeInOut));
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: animation.drive(offsetTween),
+                      child: child,
+                    ),
+                  );
+                },
+              );
+          },
+        ),
+        GoRoute( 
+          path: '/register', 
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+                key: state.pageKey,
+                child: RegisterScreen(),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  final offsetTween =
+                      Tween(begin: const Offset(1, 0), end: Offset.zero)
+                          .chain(CurveTween(curve: Curves.easeInOut));
+
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: animation.drive(offsetTween),
+                      child: child,
+                    ),
+                  );
+                },
+              ); 
+          },),
+
+        GoRoute( 
+          path: '/classrooms', 
+          builder: (context, state) {
+            return const MainLayout();
+          },),
+
+          GoRoute( 
+          path: '/profile', 
+          builder: (context, state) {
+            return const MainLayout();
+          },),
+
+
+
+      ], 
+    );
+}
+
+// final GoRouter router = GoRouter(
+  
+// );
