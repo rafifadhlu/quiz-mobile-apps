@@ -18,7 +18,6 @@ class HomeScreen extends StatefulWidget{
 
 class _homeScreenState extends State<HomeScreen>{
   final Color fontcolor = HexColor.fromHex("#102f74");
-
   
   @override
   Widget build(BuildContext context) {

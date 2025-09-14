@@ -95,10 +95,19 @@ class UserRepository {
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final new_access_token = data['access_token'];
-      debugPrint("Decoded data: ${jsonEncode(data)}");
-      return new_access_token;
+    final data = jsonDecode(response.body);
+    final newAccessToken = data['data']?['accessToken'];
+    final newRefreshToken = data['data']?['refreshToken'];
+    if (newAccessToken == null) {
+      throw Exception("No accessToken found in response: $data");
+    }
+    // Save new tokens
+    await prefs.setString('access_token', newAccessToken);
+    if (newRefreshToken != null) {
+        await prefs.setString('refresh_token', newRefreshToken);
+      }
+
+      return newAccessToken;
     } else {
       throw Exception('Failed to refresh token: ${response.body}');
     }

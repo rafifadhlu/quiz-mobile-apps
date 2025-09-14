@@ -36,6 +36,12 @@ class SharedPrefUtils {
     await prefs.setBool('is_freshOpen', freshOpenValue);
   }
 
+  static Future<void> setNewToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+    await prefs.setString('access_token', token);
+  }
+
   static Future<void> saveUserSession({
     required String accessToken,
     required String refreshToken,

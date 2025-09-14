@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
-class ClassCard extends StatelessWidget {
+class QuestionCard extends StatelessWidget{
   final int id;
   final String className;
   final String teacher;
-  final String location;
+  final double width;
+  final double height;
+  // final String location;
 
-  const ClassCard({
+  const QuestionCard({
     Key? key,
-    required this.location,
+    // required this.location,
     required this.id,
     required this.className,
     required this.teacher,
+    required this.height,
+    required this.width
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 160, // width for horizontal scroll
+      height: height,
+      width: width, // width for horizontal scroll
       child: Card(
         elevation: 3,
         margin: const EdgeInsets.all(8),
@@ -49,7 +53,7 @@ class ClassCard extends StatelessWidget {
                 child: 
                   TextButton(
                     onPressed: () {
-                      context.go('/classrooms/detail/${location}');
+                      // context.go('/classrooms/detail/${location}');
                     },
                     child: const Text("Detail"),
                   ),
@@ -62,4 +66,5 @@ class ClassCard extends StatelessWidget {
       ),
     );
   }
+
 }

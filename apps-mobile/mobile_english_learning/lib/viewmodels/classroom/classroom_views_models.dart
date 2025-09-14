@@ -11,13 +11,17 @@ class ClassroomViewsModels extends ChangeNotifier{
   bool _isLoading = false;
   String? _errorMessage;
   
+  ClassroomResponse? get classes => _classes;
   ClassroomResponse? _classes;
+
+  GetDetailsClassroomResponse? get details => _details;
+  GetDetailsClassroomResponse? _details;
+
   bool _isSuccess = false;
   
   bool get isLoading => _isLoading;
 
   String? get errorMessage => _errorMessage;
-  ClassroomResponse? get classes => _classes;
   bool get isSuccess => _isSuccess;
 
   Future<void> getAllclassrooms() async{
@@ -28,17 +32,39 @@ class ClassroomViewsModels extends ChangeNotifier{
     try{
       final response = await _repository.getAllClassrooms();
       _classes = response;
-      _isLoading = true;
+      _isSuccess = true;
       notifyListeners();   
     }catch(e){
       _errorMessage = e.toString();
       _isSuccess = false;
       notifyListeners();
     }finally{
-      _isSuccess = true;
       _isLoading = false;
       notifyListeners();
     }
   }
+
+  Future<void> getClassDetailById(int id) async{
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.getDetailClassroomsByid(id);
+      _details = response;
+      _isSuccess = true;
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
 
 }

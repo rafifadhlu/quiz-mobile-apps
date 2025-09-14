@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
+import 'package:provider/provider.dart';
+
+class ClassroomDetailScreen extends StatefulWidget{
+  final String id;
+
+  ClassroomDetailScreen({
+    super.key, required this.id,
+  });
+
+    @override
+  _classrromDetailScreenState createState() => _classrromDetailScreenState(); 
+}
+
+class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
+
+  @override
+  void initState() {
+    // fetch data when widget initializes
+    Future.microtask(() =>
+        context.read<QuizViewModels>().getDetailClassroomsByid(int.parse(widget.id)));
+    super.initState();
+  }
+  
+  @override
+  Widget build(BuildContext context){
+    final quizViewModels = context.watch<QuizViewModels>();
+    final _quizzes = quizViewModels.quizzes;
+
+    // TODO: implement build
+    return Container(
+      color: Colors.white,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+
+              children: [
+                  (_quizzes == null)?
+                  Container(padding: EdgeInsets.only(left:20.0 ,right: 20.0,top: 20.0),
+                              child: Center(
+                                child: Column(
+                                  children:<Widget> [
+                                    CircularProgressIndicator(),
+                                    Text(quizViewModels.errorMessage ?? '')
+                                  ],
+                                ),
+                              )
+                            )
+                  :
+                  Container(
+                     // background white
+                    height: MediaQuery.of(context).size.height * 0.6, // or specify a fixed height like 400
+                    child: ListView.builder(
+                      itemCount: _quizzes.data.length,
+                      itemBuilder: (context, index) {
+                        final quiz_list = _quizzes.data[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+
+                            onTap: () {
+                              debugPrint("Test tapping");
+                            },
+                            leading: Icon(Icons.book_online) ,
+                            title: Text(
+                              quiz_list.quizName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: 
+                            Text(DateFormat('dd MMM yyyy').format(quiz_list.createdAt)),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ) 
+      );
+  }
+}

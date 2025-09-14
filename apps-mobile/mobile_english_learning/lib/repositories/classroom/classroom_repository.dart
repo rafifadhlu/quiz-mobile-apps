@@ -36,15 +36,18 @@ class ClassroomRepository {
   }
   
   Future<ClassroomResponse> getAllClassrooms() async{
-      await Future.delayed(Duration(seconds:2));
+      // await Future.delayed(Duration(seconds:2));
       var url = Uri.http(baseUrl, '/api/v1/classrooms/');
       final _token = await SharedPrefUtils.readPrefStr('access_token');
 
+      debugPrint("Hit url.........");
       final response = await http.get(url,
       headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $_token',
         });
+
+        debugPrint("Status code : ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
@@ -53,15 +56,14 @@ class ClassroomRepository {
         // token expired → try refresh
         final newToken = await UserRepository().getNewAccessToken();
         if (newToken != null) {
-          await SharedPrefUtils.saveStr('access_token', newToken);
           // retry the original request
           final retryResponse = await http.get(
-            Uri.parse('$baseUrl/classrooms'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $newToken',
-            },
-          );
+              url, // ✅ use the same `url`
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $newToken',
+              },
+            );
 
           if (retryResponse.statusCode == 200) {
             final body = jsonDecode(retryResponse.body);
@@ -74,4 +76,43 @@ class ClassroomRepository {
       }
     }
 
+  Future<GetDetailsClassroomResponse> getDetailClassroomsByid(int id) async{
+      var url = Uri.http(baseUrl, 'api/v1/classrooms/${id}/details/');
+      final _token = await SharedPrefUtils.readPrefStr('access_token');
+
+      debugPrint("Hit url.........");
+      final response = await http.get(url,
+      headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+        });
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return GetDetailsClassroomResponse.fromJson(body);
+      } else if (response.statusCode == 401) {
+        // token expired → try refresh
+        final newToken = await UserRepository().getNewAccessToken();
+        if (newToken != null) {
+          // retry the original request
+          final retryResponse = await http.get(
+              url, // ✅ use the same `url`
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $newToken',
+              },
+            );
+
+          if (retryResponse.statusCode == 200) {
+            final body = jsonDecode(retryResponse.body);
+            return GetDetailsClassroomResponse.fromJson(body);
+          }
+        }
+        throw Exception('Unauthorized: Token expired and refresh failed');
+      } else {
+        throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
+      }
+
+
+  }
 }
