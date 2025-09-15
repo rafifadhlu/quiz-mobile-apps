@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile_english_learning/models/register_models.dart';
+import 'package:mobile_english_learning/models/user_models.dart';
+import 'package:mobile_english_learning/viewmodels/auth/auth_view_models.dart';
 import 'package:provider/provider.dart';
-
-
-import 'package:mobile_english_learning/viewmodels/auth/register_view_models.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -125,10 +123,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {  
-  final registerViewModel = context.watch<RegisterViewModel>();
   
+
+  @override
+  void initState() {
+    Future.microtask(() =>{
+      context.read<AuthViewModel>()
+      });
+    super.initState();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {    
+  final registerViewModel = context.watch<AuthViewModel>();
+  if (registerViewModel.isSuccess) {
+      Future.microtask(() async {
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) context.go('/login');
+      });
+    }
+
     return Scaffold(
       body: Stack(
         children: <Widget> [
@@ -164,18 +179,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     // Header
                     SizedBox(height: 20.0,),
-                    Text(
-                      registerViewModel.errorMessage ?? 'Create New Account',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w200,
-                        color: registerViewModel.errorMessage != null 
-                            ? Colors.red 
-                            : Theme.of(context).primaryColor,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    (registerViewModel.errorMessage == null)
+                        ? (!registerViewModel.isSuccess)
+                          ?
+                            Text(
+                                'Create New Account',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w200,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                textAlign: TextAlign.center,
+                              )
+                          :
+                            Container(
+                              margin: EdgeInsets.only(top: 16),
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red[100],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "Registration Success. Please Login your account",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                        :
+                        Container(
+                            margin: EdgeInsets.only(top: 16),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red[100],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              registerViewModel.errorMessage ?? "Unknown error",
+                              style: TextStyle(
+                                color: Colors.red[800],
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
                     
                     if (registerViewModel.errorMessage == null) ...[
                       Text(
@@ -387,14 +438,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate()) {
-      final registerViewModel = context.read<RegisterViewModel>();
-      await registerViewModel.registerUser(
-        _usernameController.text.trim(),
-        _passwordController.text,
-        _emailController.text.trim(),
-        _firstnameController.text.trim(),
-        _lastnameController.text.trim(),
+      final registerViewModel = context.read<AuthViewModel>();
+      final req = RegisterRequest(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text,
+        email: _emailController.text.trim(),
+        firstname: _firstnameController.text.trim(),
+        lastname: _lastnameController.text.trim(),
       );
+      await registerViewModel.registerUser(req);
     }
   }
 }

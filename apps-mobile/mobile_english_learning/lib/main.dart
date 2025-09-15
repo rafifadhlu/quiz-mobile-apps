@@ -12,7 +12,6 @@ import 'package:mobile_english_learning/repositories/classroom/classroom_reposit
 //Viewsmodel
 import 'package:mobile_english_learning/viewmodels/auth/auth_view_models.dart';
 import 'package:mobile_english_learning/viewmodels/auth/app_state_view_models.dart';
-import 'package:mobile_english_learning/viewmodels/auth/register_view_models.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 
@@ -20,7 +19,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final authViewModel = AuthViewModel(UserRepository());
   final appStateViewModel = AppStateViewModel();
-  final registerViewModel = RegisterViewModel(UserRepository());
   final classroomViewModel = ClassroomViewsModels(ClassroomRepository());
   final quizViewModels = QuizViewModels(QuizRepository());
 
@@ -37,14 +35,12 @@ void main() async {
       providers: [
         ChangeNotifierProvider<AuthViewModel>.value(value: authViewModel),
         ChangeNotifierProvider<AppStateViewModel>.value(value: appStateViewModel),
-        ChangeNotifierProvider<RegisterViewModel>.value(value: registerViewModel),
         ChangeNotifierProvider<ClassroomViewsModels>.value(value: classroomViewModel,),
         ChangeNotifierProvider<QuizViewModels>.value(value: quizViewModels)
       ],
       child: MyApp(
         authViewModel: authViewModel,
         appStateViewModel: appStateViewModel,
-        registerViewModel: registerViewModel,
         classroomViewModel: classroomViewModel,
         quizViewModels: quizViewModels,
       ),
@@ -56,7 +52,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   final AuthViewModel authViewModel;
   final AppStateViewModel appStateViewModel;
-  final RegisterViewModel registerViewModel;
   final ClassroomViewsModels classroomViewModel;
   final QuizViewModels quizViewModels;
 
@@ -64,7 +59,6 @@ class MyApp extends StatelessWidget {
     super.key,
     required this.authViewModel,
     required this.appStateViewModel,
-    required this.registerViewModel,
     required this.classroomViewModel,
     required this.quizViewModels,
   });
@@ -74,7 +68,7 @@ class MyApp extends StatelessWidget {
     final Color primaryColor = HexColor.fromHex("#102f74");
     
     return MaterialApp.router(
-      routerConfig: Createrouters(authViewModel, appStateViewModel,registerViewModel,classroomViewModel,quizViewModels),
+      routerConfig: Createrouters(authViewModel, appStateViewModel,classroomViewModel,quizViewModels),
       theme: ThemeData(
         primaryColor: primaryColor,
         fontFamily: 'Poppins',

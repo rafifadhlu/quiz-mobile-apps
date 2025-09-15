@@ -19,6 +19,18 @@ class AuthViewModel extends ChangeNotifier {
   LoginResponse? get user => _user;
   bool get isLoggedIn => _isLoggedIn;
 
+
+  registerResponse? get userRegistered => _userRegistered;
+  registerResponse? _userRegistered;
+
+  updateProfileData? get profile => _profile;
+  updateProfileData? _profile;
+
+
+  bool _isSuccess = false;
+  bool get isSuccess => _isSuccess;
+
+
   Future<void> restoreUserSession() async {
   try {
     final access = await SharedPrefUtils.readPrefStr('access_token');
@@ -104,6 +116,70 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+  Future<void> registerUser(RegisterRequest request) async{
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+      try{
+        final response = await _repository.register(request);
+        // ✅ Check if response indicates success
+        if (response.status == 201) {
+          _userRegistered = response;
+          _isSuccess = true;
+        } else {
+          _errorMessage = response.message;
+          _isSuccess = false;
+        }
+        notifyListeners();    
+      }catch(e){
+        _errorMessage = e.toString();
+        _isSuccess = false;
+        notifyListeners();
+      }finally{
+        _isLoading = false;
+        notifyListeners();
+      }
+
+    }
+
+  Future<void> fetchProfile(int userID)async {
+      _isLoading = true;
+      notifyListeners();
+      try {
+        final response = await _repository.fetchProfileData(userID);
+        _profile = response;
+        _errorMessage = null;
+      } catch (e) {
+        _errorMessage = e.toString();
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+  }
+
+  Future<void> updateProfile(updateProfileData request,int userID)async {
+      _isLoading = true;
+      notifyListeners();
+      try {
+        final response = await _repository.updateProfile(request,userID);
+        _profile = response;
+        _errorMessage = null;
+      } catch (e) {
+        _errorMessage = e.toString();
+      } finally {
+        _isLoading = false;
+        notifyListeners();
+      }
+  }
+
+  void resetState() {
+    _errorMessage = null;
+    _isLoading = false;
+    _isSuccess = false;
+    notifyListeners();
+  }
 
 
   /// ✅ Clear session

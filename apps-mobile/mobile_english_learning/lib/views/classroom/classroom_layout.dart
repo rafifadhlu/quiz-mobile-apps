@@ -94,14 +94,21 @@ class _ClassroomLayoutState extends State<ClassroomLayout> {
  @override
    Widget build(BuildContext context) {
     final classroomViewsModels = context.watch<ClassroomViewsModels>();
-    final classroom = classroomViewsModels.details!;
+    final classroom = classroomViewsModels.details;
 
+    if (classroom == null || classroom.data.isEmpty) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  final List<Widget> _pages = [
+    ClassroomDetailScreen(id: widget.classroomID),
+    MemberScreen(id: widget.classroomID),
     
-    final List<Widget> _pages = [
-      // The "Quizz" screen
-      ClassroomDetailScreen(id:widget.classroomID), 
-      MemberScreen(id:widget.classroomID),
-    ];
+  ];
 
     return Scaffold(
     body: Stack(

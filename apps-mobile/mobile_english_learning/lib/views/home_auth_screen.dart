@@ -21,7 +21,7 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
   @override
   void initState() {
     Future.microtask(() =>{
-      context.read<ClassroomViewsModels>()});
+      context.read<ClassroomViewsModels>().getAllclassrooms()});
     super.initState();
   }
 

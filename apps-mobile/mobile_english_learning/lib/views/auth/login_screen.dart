@@ -16,6 +16,16 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  @override
+  void initState() {
+    super.initState();
+    // Reset errors whenever we come to this screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthViewModel>().resetState();
+    });
+}
+
+
   // ADD THIS - Fix memory leak
   @override
   void dispose() {
@@ -250,6 +260,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
+                                        overflow: TextOverflow.clip,
                                         authViewModel.errorMessage!,
                                         style: TextStyle(
                                           color: Colors.red[800],

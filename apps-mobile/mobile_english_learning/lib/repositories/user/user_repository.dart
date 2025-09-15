@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-
-import 'package:mobile_english_learning/models/register_models.dart';
 import 'package:mobile_english_learning/models/user_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,7 +31,7 @@ class UserRepository {
     }
   }
 
-  Future <registerResponse> register(RegisterRequest request)async{
+  Future<registerResponse> register(RegisterRequest request)async{
     // await Future.delayed(Duration(seconds:1));
     var url = Uri.http(baseUrl, '/api/v1/auth/register/');
 
@@ -52,14 +50,62 @@ class UserRepository {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+        final rawData = jsonDecode(response.body);
+        if (rawData is! Map<String, dynamic>) {
+          throw Exception("Invalid response format: Expected JSON object");
+        }
+        debugPrint("Decoded data: ${jsonEncode(rawData)}");
+        return registerResponse.fromJson(rawData);
+      } else {
+        throw Exception('Failed to register: ${response.body}');
+      }
+
+      }
+
+  Future<updateProfileData> fetchProfileData(int userID) async {
+    var url = Uri.http(baseUrl, '/api/v1/auth/profile/$userID/');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return updateProfileData.fromJson(data);
+    } else {
+      throw Exception("Failed to fetch profile data: ${response.body}");
+    }
+  }
+
+  Future<updateProfileData> updateProfile(updateProfileData request,int userID) async{
+      var url = Uri.http(baseUrl, '/api/v1/auth/profile/$userID/');
+
+      final response = await http.put(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body:jsonEncode(
+            request.toJson()
+          )
+        );
+
+        if(response.statusCode == 200){
           final data = jsonDecode(response.body);
-          debugPrint("Decoded data: ${jsonEncode(data)}");
-          return registerResponse.fromJson(data);
-        } else {
-          throw Exception('Failed to register: ${response.body}');
+           debugPrint("Raw Data: ${jsonEncode(data)}");
+
+          return updateProfileData.fromJson(data);
+        }else {
+          throw Exception("Failed to fetch profile data: ${response.body}");
         }
   }
+
+
+      
 
   Future<void> BlackListToken(String refresh_token) async{
     var url = Uri.http(baseUrl, '/api/v1/auth/logout/');

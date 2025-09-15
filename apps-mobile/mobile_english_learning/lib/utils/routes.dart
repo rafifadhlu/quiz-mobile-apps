@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
+import 'package:mobile_english_learning/views/auth/edit-profile-screen.dart';
 import 'package:mobile_english_learning/views/classroom/classroom_detail.dart';
 import 'package:mobile_english_learning/views/quiz/quiz_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,16 +20,14 @@ import 'package:mobile_english_learning/views/home_screen.dart';
 //viewmodels
 import 'package:mobile_english_learning/viewmodels/auth/auth_view_models.dart';
 import 'package:mobile_english_learning/viewmodels/auth/app_state_view_models.dart';
-import 'package:mobile_english_learning/viewmodels/auth/register_view_models.dart';
 
 GoRouter Createrouters(AuthViewModel authViewModel,
 AppStateViewModel appStateViewModel,
-RegisterViewModel registerViewModel,
 ClassroomViewsModels classroomViewModel,
 QuizViewModels quizViewModels){
 
   return GoRouter(
-    refreshListenable: Listenable.merge([authViewModel, appStateViewModel,registerViewModel,classroomViewModel,quizViewModels]),
+    refreshListenable: Listenable.merge([authViewModel, appStateViewModel,classroomViewModel,quizViewModels]),
     redirect: (context, state) {
       final isLoggedIn = authViewModel.isLoggedIn;
       final isFreshOpen = appStateViewModel.isFreshOpen;
@@ -66,7 +65,7 @@ QuizViewModels quizViewModels){
           pageBuilder: (context, state) {
             return CustomTransitionPage(
                 key: state.pageKey,
-                child: QuizLayout(quizID: "1", classroomID:"1"),
+                child: AuthScreen(),
                 transitionsBuilder: (context, animation, secondaryAnimation, child) {
                   final offsetTween =
                       Tween(begin: const Offset(1, 0), end: Offset.zero)
@@ -104,6 +103,14 @@ QuizViewModels quizViewModels){
                 },
               ); 
           },),
+
+          
+        GoRoute(
+          path: '/profile/details/:userID', 
+          builder: (context, state) {
+            return editProfileScreen(userID: state.pathParameters['userID']!);
+            },
+          ),
 
         GoRoute( 
           path: '/classrooms', 
