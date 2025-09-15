@@ -49,7 +49,45 @@ class QuizRepository {
       } else {
         throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
       }
+  }
 
+  Future<getQuestionsResponse> getAllQuestionsofQuiz(int classroomId, int quizID) async{
+      var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizID/questions/');
+      final _token = await SharedPrefUtils.readPrefStr('access_token');
+
+      debugPrint("Hit url.........");
+      final response = await http.get(url,
+      headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+      });
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        debugPrint(body.toString());
+        return getQuestionsResponse.fromJson(body);
+      } else if (response.statusCode == 401) {
+        // token expired → try refresh
+        final newToken = await UserRepository().getNewAccessToken();
+        if (newToken != null) {
+          // retry the original request
+          final retryResponse = await http.get(
+              url, // ✅ use the same `url`
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $newToken',
+              },
+            );
+
+          if (retryResponse.statusCode == 200) {
+            final body = jsonDecode(retryResponse.body);
+            return getQuestionsResponse.fromJson(body);
+          }
+          }
+          throw Exception('Unauthorized: Token expired and refresh failed');
+        } else {
+          throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
+        }
 
   }
 }

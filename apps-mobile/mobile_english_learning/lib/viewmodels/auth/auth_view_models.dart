@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_english_learning/models/global_models.dart';
 import 'package:mobile_english_learning/models/user_models.dart';
 import 'package:mobile_english_learning/repositories/user/user_repository.dart';
 
 import 'package:mobile_english_learning/utils/shared_prefs.dart';
+import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
+import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
+import 'package:provider/provider.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final UserRepository _repository;
@@ -183,7 +187,7 @@ class AuthViewModel extends ChangeNotifier {
 
 
   /// ✅ Clear session
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     _user = null;
     _isLoggedIn = false;
     final refreshToken = await SharedPrefUtils.readPrefStr('refreshToken');
@@ -192,8 +196,13 @@ class AuthViewModel extends ChangeNotifier {
     if (refreshToken != null){
       _repository.BlackListToken(refreshToken);
     }
-    
     await SharedPrefUtils.removePrefs();
+    final cleaneup = globalCleanup(
+      classroomViewsModels: context.read<ClassroomViewsModels>(), 
+      quizViewModels: context.read<QuizViewModels>());
+
+      cleaneup.resetAll();
+      
     notifyListeners();
   }
 }

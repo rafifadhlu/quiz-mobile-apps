@@ -19,11 +19,11 @@ class UserClassroomView(ListCreateAPIView):
     serializer_class = UserClassroomSerializer
 
     def get_queryset(self):
-        is_teacher = self.request.user.groups.filter(name="Teachers").exists() 
-        if is_teacher:
-            return classroom.objects.filter(teacher=self.request.user)
-        else:
-            return classroom.objects.filter(students=self.request.user)
+        user = self.request.user
+        if user.groups.filter(name="Teachers").exists():
+            return classroom.objects.filter(teacher=user).distinct()
+        return classroom.objects.filter(classroom_member__student=user).distinct()
+
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

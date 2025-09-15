@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_english_learning/components/question_card.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
+import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:mobile_english_learning/views/classroom/classroom_detail.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +21,8 @@ class _QuizLayoutState extends State<QuizLayout> {
   
   @override
   void initState() {
-      // Future.microtask(() =>
-        // context.read<ClassroomViewsModels>().getClassDetailById(int.parse(widget.classroomID)));
+      Future.microtask(() =>
+        context.read<QuizViewModels>().getAllQuestionsofQuiz(int.parse(widget.classroomID),int.parse(widget.quizID)));
     super.initState();
   }
 
@@ -31,15 +32,59 @@ class _QuizLayoutState extends State<QuizLayout> {
 
  @override
    Widget build(BuildContext context) {
-    final classroomViewsModels = context.watch<ClassroomViewsModels>();
-    final classroom = classroomViewsModels.details;
-    List<dynamic> questions;
+    final questionsViewModels = context.watch<QuizViewModels>();
+    final questions = questionsViewModels.questions;
+    
+      void testTapping(){
+        debugPrint("Successfully");
+          setState(() {
+            _currentIndexQuestions += 1;
+          });
+
+        debugPrint("Max Length : ${questions?.data.toString()}");
+        debugPrint("CurrIndex : ${_currentIndexQuestions}");
+
+      }
+
+        if (questions == null) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: 
+              IconButton(onPressed: () => context.go('/'), icon: Icon(Icons.arrow_back_outlined)),
+          ),
+          body: Center(
+            child: Column(
+              children: [
+                // Text(questions.message)
+              ],
+            ),
+          ),
+        );
+      }
+
+      if (questions.data.isEmpty) {
+        return Scaffold(
+           appBar: AppBar(
+            leading: 
+              IconButton(onPressed: () => context.go('/'), icon: Icon(Icons.arrow_back_outlined)),
+          ),
+          body: Center(
+            child: Text("You have not joined class yet : ${questions.data}"),
+          ),
+        );
+      }
+
+
+      final eachQuestion = questions.data[_currentIndexQuestions];
+
+      List<Map<String, dynamic>> choicesList = eachQuestion.choices_list
+          .map((c) => {"id": c.id, "choice_text": c.choice_text})
+          .toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Column(
           children: [
-
             Text(
               "Brain Boost",
               style: TextStyle(
@@ -97,12 +142,16 @@ class _QuizLayoutState extends State<QuizLayout> {
                   child: 
                     QuestionCard(
                       // location:'/tes',
-                      id: 1,
-                      className: 'tes', 
-                      teacher: 'tes',
+                      id: eachQuestion.id,
+                      questionText: eachQuestion.question_text, 
+                      choicesList: choicesList,
                       width: 300,
                       height: 320,
-                      
+                      buttonLabel: "Next",
+                      functionOperation:testTapping,
+                      currentIndex: _currentIndexQuestions,
+                      maxLen: questions.data.length -1,
+                      endLabel: "Submit",
                       )
                     
                   ,
@@ -118,6 +167,7 @@ class _QuizLayoutState extends State<QuizLayout> {
 
       ],
     ),
+  
   );
 }
 

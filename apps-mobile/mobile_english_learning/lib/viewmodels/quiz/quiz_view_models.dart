@@ -13,6 +13,9 @@ class QuizViewModels extends ChangeNotifier{
   getQuizzesResponse? get quizzes => _quizzes;
   getQuizzesResponse? _quizzes;
 
+  getQuestionsResponse? get questions => _questions;
+  getQuestionsResponse? _questions;
+
   bool _isSuccess = false;
   
   bool get isLoading => _isLoading;
@@ -39,6 +42,34 @@ class QuizViewModels extends ChangeNotifier{
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> getAllQuestionsofQuiz(int classroomID, quizID) async{
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.getAllQuestionsofQuiz(classroomID,quizID);
+      _questions = response;
+      _isSuccess = true;
+      debugPrint(_quizzes as String?);
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void reset(){
+    _quizzes = null;
+    _questions = null;
+    _errorMessage = '';
+    notifyListeners();
   }
 
 

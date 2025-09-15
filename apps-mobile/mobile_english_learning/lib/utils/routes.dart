@@ -126,7 +126,7 @@ QuizViewModels quizViewModels){
           },),
 
         GoRoute( 
-          path: 'classrooms/:classroomID/quizzes/:quizID/questions', 
+          path: '/classrooms/:classroomID/quizzes/:quizID/questions', 
           builder: (context, state) {
             return QuizLayout(
             classroomID: state.pathParameters['classroomID']!,

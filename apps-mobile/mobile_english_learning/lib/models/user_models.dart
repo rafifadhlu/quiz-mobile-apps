@@ -224,49 +224,6 @@ class tokenData {
 }
 
 ///Update profile
-class updateProfileRequest{
-  final String? username;
-  final String? first_name;
-  final String? last_name;
-  final String? email;
-
-  updateProfileRequest({
-    this.username,
-    this.first_name,
-    this.last_name,
-    this.email,
-  });
-
-  Map<String,dynamic> toJson(){
-    return{
-      'username':username,
-      'first_name':first_name,
-      'last_name':last_name,
-      'email':email,
-    };
-  }
-}
-
-// class updateProfileResponse{
-//   final int status;
-//   final String message;
-//   final updateProfileData data;
-
-//   updateProfileResponse({
-//     required this.status,
-//     required this.message,
-//     required this.data,
-//   });
-
-//   factory updateProfileResponse.fromJson(Map<String, dynamic> json) {
-//     return updateProfileResponse(
-//       status: json['status'],
-//       message: json['message'],
-//       data: updateProfileData.fromJson(json['data']),
-//     );
-//   }
-// }
-
 class updateProfileData{
   final String? username;
   final String? first_name;

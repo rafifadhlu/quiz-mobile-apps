@@ -134,11 +134,13 @@ class Student {
   final int id;
   final String email;
   final String studentFirstName;
+  final String studentLastname;
 
   Student({
     required this.id,
     required this.email,
     required this.studentFirstName,
+    required this.studentLastname,
   });
 
   factory Student.fromJson(Map<String, dynamic> json) {
@@ -146,6 +148,7 @@ class Student {
       id: json['id'],
       email: json['email'],
       studentFirstName: json['student_first_name'],
+      studentLastname: json['student_last_name'],
     );
   }
 
@@ -154,6 +157,7 @@ class Student {
       'id': id,
       'email': email,
       'student_first_name': studentFirstName,
+      'student_last_name': studentLastname,
     };
   }
 }

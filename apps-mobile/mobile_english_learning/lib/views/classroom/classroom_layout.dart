@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
+import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:mobile_english_learning/views/classroom/classroom_detail.dart';
 import 'package:provider/provider.dart';
 
@@ -50,13 +51,13 @@ class _MemberScreenState extends State<MemberScreen>{
                 ),
               ),
               title: Text(
-                student.studentFirstName,
+                "${student.studentFirstName} ${student.studentLastname}",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 14,
                 ),
               ),
-              subtitle: Text(student.email),
+              subtitle: Text(student.email,style: TextStyle(fontSize: 10.0),),
             ),
           );
         },
@@ -82,9 +83,9 @@ class _ClassroomLayoutState extends State<ClassroomLayout> {
   @override
   void initState() {
     _selectedIndex = widget.indexNeeded;
+    super.initState();
       Future.microtask(() =>
         context.read<ClassroomViewsModels>().getClassDetailById(int.parse(widget.classroomID)));
-    super.initState();
   }
 
   void _onItemTapped(int index) {
@@ -96,13 +97,22 @@ class _ClassroomLayoutState extends State<ClassroomLayout> {
     final classroomViewsModels = context.watch<ClassroomViewsModels>();
     final classroom = classroomViewsModels.details;
 
-    if (classroom == null || classroom.data.isEmpty) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
+   if (classroom == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (classroom.data.isEmpty) {
+      return Scaffold(
+        body: const Center(
+          child: Text("You have not joined class yet"),
+        ),
+      );
+    }
+
 
   final List<Widget> _pages = [
     ClassroomDetailScreen(id: widget.classroomID),
@@ -110,128 +120,112 @@ class _ClassroomLayoutState extends State<ClassroomLayout> {
     
   ];
 
-    return Scaffold(
-    body: Stack(
-      alignment: Alignment.center,
-      children: [
-        // 🌈 Background gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white.withOpacity(0.5),
-                const Color.fromARGB(255, 0, 85, 212).withOpacity(0.8),
+return Scaffold(
+  body: Column(
+    children: [
+      Container(
+        color: Theme.of(context).primaryColor,
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+              // The row itself should have spaceBetween or start alignment
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // 1. The IconButton on the left side
+                Expanded(
+                  flex: 1,
+                  child: 
+                    IconButton(
+                      onPressed: () => context.go('/classrooms'),
+                      icon: const Icon(Icons.navigate_before, color: Colors.white),
+                    ),
+                  ),
+                // 2. The Text in the middle, using Expanded to take remaining space
+                Expanded(
+                  flex: 5,
+                  child: Center(
+                    child: Text(
+                      classroom.data[0].className,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  flex: 1,
+                  child: Text(""))
               ],
             ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => _onItemTapped(0),
+                    child: Text(
+                      "Quizz",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: _selectedIndex == 0 ? Colors.white : Colors.white70,
+                        fontWeight: _selectedIndex == 0
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  TextButton(
+                    onPressed: () => _onItemTapped(1),
+                    child: Text(
+                      "Member",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: _selectedIndex == 1 ? Colors.white : Colors.white70,
+                        fontWeight: _selectedIndex == 1
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
 
-        // 🖼️ Fixed centered logo (watermark style)
-        IgnorePointer(
-          child: Opacity(
-            opacity: 0.15,
-            child: Image.asset(
-              "assets/icons/logo-fix.png",
-              width: 220,
-              height: 220,
-              fit: BoxFit.contain,
+      // 📜 Scrollable content - NO GAP
+      Expanded(
+        child: ClipRect( // ✅ Add ClipRect to contain the animation
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+            child: Container(
+              key: ValueKey(_selectedIndex), // ✅ Add key for proper animation
+              width: double.infinity, // ✅ Take full width
+              height: double.infinity, // ✅ Take full height
+              child: _pages[_selectedIndex],
             ),
           ),
         ),
+      ),
+    ],
+  ),
+);
 
-        // 📜 Scrollable content
-        CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: 150,
-              backgroundColor: Theme.of(context).primaryColor,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                titlePadding: const EdgeInsets.only(bottom: 12), // 👈 center fix
-                title: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        const SizedBox(height: 8),
-                        IconButton(
-                          onPressed:() {context.go('/classrooms');}, 
-                          icon: Icon(Icons.navigate_before,color: Colors.white,)),
-                        Text(
-                          classroom.data[0].className,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                          onPressed: () => _onItemTapped(0),
-                          child: Text(
-                            "Quizz",
-                            style: TextStyle(
-                              color: _selectedIndex == 0
-                                  ? Colors.white
-                                  : Colors.white70,
-                              fontWeight: _selectedIndex == 0
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        TextButton(
-                          onPressed: () => _onItemTapped(1),
-                          child: Text(
-                            "Member",
-                            style: TextStyle(
-                              color: _selectedIndex == 1
-                                  ? Colors.white
-                                  : Colors.white70,
-                              fontWeight: _selectedIndex == 1
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 🔄 Page switcher
-            SliverToBoxAdapter(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) => SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-                child: Container(
-                  key: ValueKey<int>(_selectedIndex),
-                  height: 500,
-                  child: _pages[_selectedIndex],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 }
 
 }

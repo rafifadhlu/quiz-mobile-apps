@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
                           SizedBox(
                             width: 300.0,
                             child: ElevatedButton(
-                              onPressed: () => authViewModel.logout(),
+                              onPressed: () => authViewModel.logout(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,

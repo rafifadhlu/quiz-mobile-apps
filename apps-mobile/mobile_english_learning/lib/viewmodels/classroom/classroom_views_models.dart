@@ -65,6 +65,10 @@ class ClassroomViewsModels extends ChangeNotifier{
     }
   }
 
-
-
+  void reset(){
+    _classes= null;
+    _details= null; 
+    _errorMessage = '';
+    notifyListeners();
+  }
 }

@@ -18,4 +18,6 @@ class AppStateViewModel extends ChangeNotifier {
     _isFreshOpen = value;
     notifyListeners();
   }
+
+  
 }

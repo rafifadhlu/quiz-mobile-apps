@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,10 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
     Future.microtask(() =>
         context.read<QuizViewModels>().getDetailClassroomsByid(int.parse(widget.id)));
     super.initState();
+  }
+
+  void _handleQuiz(int quizID){
+    context.go('/classrooms/${widget.id}/quizzes/${quizID}/questions');
   }
   
   @override
@@ -64,9 +69,7 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
                           ),
                           child: ListTile(
 
-                            onTap: () {
-                              debugPrint("Test tapping");
-                            },
+                            onTap: () => _handleQuiz(quiz_list.id),
                             leading: Icon(Icons.book_online) ,
                             title: Text(
                               quiz_list.quizName,

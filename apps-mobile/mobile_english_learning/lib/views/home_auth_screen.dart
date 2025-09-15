@@ -150,15 +150,26 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                                             ],
                                           )                   
                                         ),
-                                      
-                                      (classes == null)
-                                      ?
 
-                                      Container(
-                                          child: CircularProgressIndicator(),
-                                        
-                                      )
-                                      :
+                                        if (classes == null) 
+                                          Container(
+                                            child: CircularProgressIndicator(),
+                                        )else if (classes.data.isEmpty) 
+                                          Container(
+                                            margin: const EdgeInsets.only(top: 30.0),
+                                            alignment: Alignment.center,
+                                            child: Column(
+                                              children: const [
+                                                Icon(Icons.info_outline, color: Colors.grey, size: 40),
+                                                SizedBox(height: 10),
+                                                Text(
+                                                  "No classes found",
+                                                  style: TextStyle(color: Colors.grey),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        else
                                       Container(
                                         margin: const EdgeInsets.only(top: 30.0),
                                         alignment: Alignment.centerLeft,
@@ -181,20 +192,25 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                                             SizedBox(
                                               height: 180,
                                               child: 
-                                              ListView.builder(
-                                                scrollDirection: Axis.horizontal,
-                                                shrinkWrap: true,
-                                                  itemCount: classes.data.length,
-                                                  itemBuilder: (context, index) {
-                                                    final classItem = classes.data[index];
-                                                    return ClassCard(
-                                                      id: classItem.id,
-                                                      className: classItem.className,
-                                                      teacher: classItem.teacher,
-                                                      location: classItem.id.toString(),
-                                                    );
-                                                  },
-                                                ),
+                                              Container(
+                                                constraints: BoxConstraints.tight(Size(350.0, 50.0)),
+                                                decoration: BoxDecoration(color: const Color.fromARGB(255, 224, 224, 224), borderRadius: BorderRadius.circular(20)),
+                                                child: 
+                                                ListView.builder(
+                                                  scrollDirection: Axis.horizontal,
+                                                  shrinkWrap: true,
+                                                    itemCount: classes.data.length,
+                                                    itemBuilder: (context, index) {
+                                                      final classItem = classes.data[index];
+                                                      return ClassCard(
+                                                        id: classItem.id,
+                                                        className: classItem.className,
+                                                        teacher: classItem.teacher,
+                                                        location: classItem.id.toString(),
+                                                      );
+                                                    },
+                                                  ),
+                                              )
                                             )
                                             
 

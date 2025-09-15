@@ -55,10 +55,11 @@ class UserAddClassroomMemberSerializer(serializers.Serializer):
 
 class MemberListSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField(source='first_name', read_only=True)
+    student_last_name = serializers.CharField(source='last_name', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'student_first_name']
+        fields = ['id', 'email', 'student_first_name','student_last_name']
 
 class UserClassroomMemberSerializer(serializers.ModelSerializer):
     """
