@@ -26,7 +26,7 @@ class UserClassroomView(ListCreateAPIView):
 
     
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset() 
         if queryset.exists():
             serializer = self.get_serializer(queryset, many=True)
             return Response(status=status.HTTP_200_OK,

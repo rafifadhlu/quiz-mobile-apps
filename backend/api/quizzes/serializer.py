@@ -95,7 +95,7 @@ class QuestionsSerializer(serializers.ModelSerializer):
 class UserQuestionsSerializer(serializers.Serializer):
     questions = serializers.JSONField(write_only=True)  # Changed this!
     images_files = serializers.ListField(
-        child=serializers.ImageField(), required=False, write_only=True
+        child=serializers.ImageField(), required=True, write_only=True
     )
 
     def validate_questions(self, value):

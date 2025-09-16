@@ -29,12 +29,14 @@ class Quizesdata{
   final int classroom;
   final String quizName;
   final DateTime createdAt;
+  resultData? result;
 
   Quizesdata({
     required this.id,
-  required this.classroom,
-  required this.quizName,
-  required this.createdAt,
+    required this.classroom,
+    required this.quizName,
+    required this.createdAt,
+    this.result  
   });
 
   factory Quizesdata.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,9 @@ class Quizesdata{
       classroom: json['classroom'], 
       quizName : json['quiz_name'],
       createdAt: DateTime.parse(json['created_at']),
+      result: json['result'] != null 
+        ? resultData.fromJson(json['result']) 
+        : null,
     );
   }
 }
@@ -121,3 +126,91 @@ class choiceListData{
     );
   }
 }
+
+
+class answerDataRequest{
+  final int quiz_id;
+  final int question_id;
+  final int answer_id;
+
+  answerDataRequest({
+    required this.quiz_id,
+    required this.question_id,
+    required this.answer_id,
+  });
+
+  Map<String, dynamic> toJson(){
+    return{
+      'quiz_id' : quiz_id,
+      'question_id': question_id,
+      'answer_id' :answer_id,
+    };
+  }
+}
+
+class answerDataResponse {
+  final int status;
+  final String message;
+  final answerData data;
+
+  answerDataResponse({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+
+  factory answerDataResponse.fromJson(Map<String, dynamic> json) {
+    return answerDataResponse(
+      status: json["status"],
+      message: json["message"],
+      data: answerData.fromJson(json['data']),
+    );
+  }
+}
+
+class answerData{
+  final int answer;
+  final bool is_correct;
+
+  answerData({
+    required this.answer,
+    required this.is_correct,
+  });
+
+  factory answerData.fromJson(Map<String, dynamic> json) {
+    return answerData(
+      answer: json['answer'],
+      is_correct: json['is_correct'],
+    );
+  }
+}
+
+class resultData{
+  final int id;
+  final int score;
+  final String answered_at;
+  final int student;
+  final int quiz;
+
+
+  resultData({
+    required this.id,
+    required this.score,
+    required this.answered_at,
+    required this.student,
+    required this.quiz,
+  });
+
+  factory resultData.fromJson(Map<String, dynamic> json) {
+    return resultData(
+      id: json['id'],
+      score: json['score'],
+      answered_at: json['answered_at'],
+      student: json['student'],
+      quiz: json['quiz'],
+    );
+  }
+}
+
+
+

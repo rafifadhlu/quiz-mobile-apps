@@ -34,17 +34,19 @@ class _QuizLayoutState extends State<QuizLayout> {
    Widget build(BuildContext context) {
     final questionsViewModels = context.watch<QuizViewModels>();
     final questions = questionsViewModels.questions;
+    debugPrint("FROM LAYOUT : ${widget.classroomID}");
     
-      void testTapping(){
-        debugPrint("Successfully");
+      void getAnswerData(int questionId, int quizId, int answerId) {
+          debugPrint("Successfully get question id: ${questionId} quiz id: ${quizId} answer id: ${answerId} ");
           setState(() {
             _currentIndexQuestions += 1;
           });
 
-        debugPrint("Max Length : ${questions?.data.toString()}");
-        debugPrint("CurrIndex : ${_currentIndexQuestions}");
 
-      }
+          debugPrint("Max Length : ${questions?.data.toString()}");
+          debugPrint("CurrIndex : ${_currentIndexQuestions}");
+        }
+
 
         if (questions == null) {
         return Scaffold(
@@ -69,7 +71,7 @@ class _QuizLayoutState extends State<QuizLayout> {
               IconButton(onPressed: () => context.go('/'), icon: Icon(Icons.arrow_back_outlined)),
           ),
           body: Center(
-            child: Text("You have not joined class yet : ${questions.data}"),
+            child: Text("There is no questions available now"),
           ),
         );
       }
@@ -134,29 +136,21 @@ class _QuizLayoutState extends State<QuizLayout> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 300,
-                  ),
-                  child: 
                     QuestionCard(
-                      // location:'/tes',
+                      quizId:int.parse(widget.quizID),
                       id: eachQuestion.id,
+                      classroomId: int.parse(widget.classroomID),
+                      question_image:eachQuestion.question_image_url,
                       questionText: eachQuestion.question_text, 
                       choicesList: choicesList,
                       width: 300,
-                      height: 320,
+                      height: 500,
                       buttonLabel: "Next",
-                      functionOperation:testTapping,
+                      functionOperation:getAnswerData,
                       currentIndex: _currentIndexQuestions,
                       maxLen: questions.data.length -1,
                       endLabel: "Submit",
                       )
-                    
-                  ,
-                  )
-
                 ],
               )
               ,

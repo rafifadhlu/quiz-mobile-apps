@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +9,7 @@ class ClassroomDetailScreen extends StatefulWidget{
   final String id;
 
   ClassroomDetailScreen({
-    super.key, required this.id,
+    super.key, required this.id
   });
 
     @override
@@ -31,6 +32,7 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
   
   @override
   Widget build(BuildContext context){
+    final classroomViewModel = context.watch<ClassroomViewsModels>();
     final quizViewModels = context.watch<QuizViewModels>();
     final _quizzes = quizViewModels.quizzes;
 
@@ -68,19 +70,51 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-
-                            onTap: () => _handleQuiz(quiz_list.id),
-                            leading: Icon(Icons.book_online) ,
-                            title: Text(
-                              quiz_list.quizName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                              onTap: quiz_list.result == null 
+                                  ? () => _handleQuiz(quiz_list.id) 
+                                  : null, // null disables the tap
+                              leading: const Icon(Icons.book_online),
+                              title: Text(
+                                quiz_list.quizName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
+                              subtitle: Text(
+                                DateFormat('dd MMM yyyy').format(quiz_list.createdAt),
+                              ),
+                              trailing: quiz_list.result != null
+                                      ? Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          mainAxisSize: MainAxisSize.min, // prevent taking full height
+                                          children: <Widget>[
+
+                                            DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                color:  Colors.green,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                width: 80.0,
+                                                height: 20.0,
+                                                child: Text(
+                                                  "Score: ${quiz_list.result!.score}",
+                                                  style: const TextStyle(color: Colors.white),
+                                                ),
+                                              )
+                                            ),
+                                          
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              quiz_list.result!.answered_at,
+                                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                            ),
+                                          ],
+                                        )
+                                      : null, // show score if quiz done
                             ),
-                            subtitle: 
-                            Text(DateFormat('dd MMM yyyy').format(quiz_list.createdAt)),
-                          ),
                         );
                       },
                     ),

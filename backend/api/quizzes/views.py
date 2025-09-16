@@ -236,9 +236,9 @@ class UserDeleteQuestion(DestroyAPIView):
                         })
 
 class UserSubmitQuizzes(ListCreateAPIView):
-    permission_classes = [IsAuthenticated,IsStudent,IsTeacher]
+    permission_classes = [IsAuthenticated,IsStudent]
     serializer_class = UserSubmitAnswerSerializer
-    
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["user"] = self.request.user
@@ -267,4 +267,18 @@ class UserGetQuizzesResult(RetrieveAPIView):
 
         return get_object_or_404(
             QuizAttempt, quiz_id=quiz_id, quiz__classroom_id=classroom_id
+        )
+
+
+class UserGetSpecifyQuizzesResult(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuizAttemptSerializer 
+
+    def get_object(self):
+        user_id = self.kwargs.get("pk")
+        quiz_id = self.kwargs.get('quiz_id')
+        classroom_id = self.kwargs.get("classroom_id")
+
+        return get_object_or_404(
+            QuizAttempt, quiz_id=quiz_id, quiz__classroom_id=classroom_id,student_id=user_id
         )
