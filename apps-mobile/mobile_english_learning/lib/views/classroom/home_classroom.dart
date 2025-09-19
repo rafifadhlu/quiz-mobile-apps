@@ -38,7 +38,7 @@ class _ClassroomHomeState extends State<ClassroomHome> {
         Expanded(
           child: 
             user == null
-                ? const Center(child: CircularProgressIndicator())
+                ? Container(child: Text("no data available"))
                 :
                 Container(
                   child: SafeArea(

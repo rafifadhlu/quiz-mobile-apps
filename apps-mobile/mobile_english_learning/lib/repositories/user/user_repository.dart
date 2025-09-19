@@ -81,7 +81,7 @@ class UserRepository {
     }
   }
 
-  Future<updateProfileData> updateProfile(updateProfileData request,int userID) async{
+  Future<User> updateProfile(updateProfileData request,int userID) async{
       var url = Uri.http(baseUrl, '/api/v1/auth/profile/$userID/');
 
       final response = await http.put(
@@ -98,7 +98,7 @@ class UserRepository {
           final data = jsonDecode(response.body);
            debugPrint("Raw Data: ${jsonEncode(data)}");
 
-          return updateProfileData.fromJson(data);
+          return User.fromJson(data);
         }else {
           throw Exception("Failed to fetch profile data: ${response.body}");
         }

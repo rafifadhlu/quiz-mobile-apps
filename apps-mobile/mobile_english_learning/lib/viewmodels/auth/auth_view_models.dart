@@ -168,10 +168,12 @@ class AuthViewModel extends ChangeNotifier {
       notifyListeners();
       try {
         final response = await _repository.updateProfile(request,userID);
-        _profile = response;
+        user!.data.user = response;
         _errorMessage = null;
+        notifyListeners();
       } catch (e) {
         _errorMessage = e.toString();
+        notifyListeners();
       } finally {
         _isLoading = false;
         notifyListeners();

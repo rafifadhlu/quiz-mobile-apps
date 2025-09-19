@@ -95,7 +95,10 @@ class QuestionsSerializer(serializers.ModelSerializer):
 class UserQuestionsSerializer(serializers.Serializer):
     questions = serializers.JSONField(write_only=True)  # Changed this!
     images_files = serializers.ListField(
-        child=serializers.ImageField(), required=True, write_only=True
+        child=serializers.ImageField(), required=False, write_only=True
+    )
+    audio_files = serializers.ListField(
+        child=serializers.FileField(), required=False, write_only=True
     )
 
     def validate_questions(self, value):
@@ -131,6 +134,7 @@ class UserQuestionsSerializer(serializers.Serializer):
         request = self.context.get("request")
 
         image_from_field = validated_data.pop("images_files",[])
+        audio_from_field = validated_data.pop("audio_files",[])
 
         created_questions = []
         questions_data = validated_data["questions"]
@@ -139,7 +143,10 @@ class UserQuestionsSerializer(serializers.Serializer):
             choices_data = q_item.pop("choices", [])
 
             if index < len(image_from_field) and image_from_field[index]:
-                q_item["question_image"] = image_from_field[index] 
+                q_item["question_image"] = image_from_field[index]
+
+            if index < len(audio_from_field) and audio_from_field[index]:
+                q_item["question_audio"] = audio_from_field[index] 
             
             question_instance = questions.objects.create(
                 quiz=quiz_instance, **q_item

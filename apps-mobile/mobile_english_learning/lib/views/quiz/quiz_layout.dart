@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:mobile_english_learning/components/question_card.dart';
+import 'package:mobile_english_learning/models/quiz_model.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:mobile_english_learning/views/classroom/classroom_detail.dart';
@@ -18,16 +20,40 @@ class QuizLayout extends StatefulWidget {
 
 class _QuizLayoutState extends State<QuizLayout> {
   late int _currentIndexQuestions = 0;
+  late AudioPlayer _audioPlayer;
+  bool isPlaying = false;
+ 
   
   @override
   void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
       Future.microtask(() =>
         context.read<QuizViewModels>().getAllQuestionsofQuiz(int.parse(widget.classroomID),int.parse(widget.quizID)));
-    super.initState();
   }
 
   void _onItemTapped() {
     setState(() => _currentIndexQuestions += 1);
+  }
+
+  
+
+Future<void> playToggle(String url) async {
+  if (isPlaying) return; // don't replay if already playing
+  setState(() => isPlaying = true);
+
+  await _audioPlayer.stop();
+  await _audioPlayer.setUrl(url); // ensure fresh start
+  await _audioPlayer.play(); // play once
+  }
+
+
+  
+  @override
+  void dispose() {
+      AudioPlayer.clearAssetCache();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
  @override
@@ -35,49 +61,76 @@ class _QuizLayoutState extends State<QuizLayout> {
     final questionsViewModels = context.watch<QuizViewModels>();
     final questions = questionsViewModels.questions;
     debugPrint("FROM LAYOUT : ${widget.classroomID}");
+
     
       void getAnswerData(int questionId, int quizId, int answerId) {
-          debugPrint("Successfully get question id: ${questionId} quiz id: ${quizId} answer id: ${answerId} ");
-          setState(() {
-            _currentIndexQuestions += 1;
-          });
+        debugPrint("Successfully get question id: $questionId quiz id: $quizId answer id: $answerId ");
+        setState(() {
+          _currentIndexQuestions += 1; // go to next question
+        });
 
+        final answerReq = answerDataRequest(
+                          quiz_id: quizId,
+                          question_id: questionId,
+                          answer_id: answerId,
+                        );
 
-          debugPrint("Max Length : ${questions?.data.toString()}");
-          debugPrint("CurrIndex : ${_currentIndexQuestions}");
-        }
+                        // call your provider to submit
+        context
+          .read<QuizViewModels>()
+          .submitUserAnswer(answerReq, int.parse(widget.classroomID), int.parse(widget.quizID));
 
-
-        if (questions == null) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: 
-              IconButton(onPressed: () => context.go('/'), icon: Icon(Icons.arrow_back_outlined)),
-          ),
-          body: Center(
-            child: Column(
-              children: [
-                // Text(questions.message)
-              ],
-            ),
-          ),
-        );
-      }
-
-      if (questions.data.isEmpty) {
-        return Scaffold(
-           appBar: AppBar(
-            leading: 
-              IconButton(onPressed: () => context.go('/'), icon: Icon(Icons.arrow_back_outlined)),
-          ),
-          body: Center(
-            child: Text("There is no questions available now"),
-          ),
-        );
       }
 
 
-      final eachQuestion = questions.data[_currentIndexQuestions];
+        void showEndMessage(int questionId, int quizId, int answerId) {
+            final parentContext = context; // save before opening dialog
+
+            showDialog(
+              context: parentContext,
+              barrierDismissible: false,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  title: const Text("Submit Quiz"),
+                  content: const Text("Are you sure you want to submit your answers?"),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(); // close dialog first
+
+                        // final answerReq = answerDataRequest(
+                        //   quiz_id: quizId,
+                        //   question_id: questionId,
+                        //   answer_id: answerId,
+                        // );
+
+                        // call your provider to submit
+                        // context
+                        //     .read<QuizViewModels>()
+                        //     .submitUserAnswer(answerReq, int.parse(widget.classroomID), int.parse(widget.quizID));
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Quiz submitted!",
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ),
+                        );
+
+                        Future.delayed(const Duration(seconds: 3), () {
+                          parentContext.go('/classrooms');
+                        });
+                      },
+                      child: const Text("Submit"),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+
+      final eachQuestion = questions!.data[_currentIndexQuestions];
 
       List<Map<String, dynamic>> choicesList = eachQuestion.choices_list
           .map((c) => {"id": c.id, "choice_text": c.choice_text})
@@ -137,20 +190,24 @@ class _QuizLayoutState extends State<QuizLayout> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                     QuestionCard(
-                      quizId:int.parse(widget.quizID),
-                      id: eachQuestion.id,
-                      classroomId: int.parse(widget.classroomID),
-                      question_image:eachQuestion.question_image_url,
-                      questionText: eachQuestion.question_text, 
-                      choicesList: choicesList,
-                      width: 300,
-                      height: 500,
-                      buttonLabel: "Next",
-                      functionOperation:getAnswerData,
-                      currentIndex: _currentIndexQuestions,
-                      maxLen: questions.data.length -1,
-                      endLabel: "Submit",
-                      )
+                    quizId: int.parse(widget.quizID),
+                    id: eachQuestion.id,
+                    classroomId: int.parse(widget.classroomID),
+                    question_image: eachQuestion.question_image_url,
+                    question_audio: eachQuestion.question_audio_url,
+                    questionText: eachQuestion.question_text,
+                    choicesList: choicesList,
+                    width: 300,
+                    height: 500,
+                    buttonLabel: "Next",
+                    functionOperation: getAnswerData,
+                    currentIndex: _currentIndexQuestions,
+                    maxLen: questions!.data.length - 1,
+                    endLabel: "Submit",
+                    onPressed: playToggle,
+                    onSubmit: showEndMessage, // 👈 parent handles it now
+                  )
+
                 ],
               )
               ,

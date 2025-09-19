@@ -4,6 +4,9 @@ import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_mod
 import 'package:mobile_english_learning/viewmodels/quiz/quiz_view_models.dart';
 import 'package:mobile_english_learning/views/auth/edit-profile-screen.dart';
 import 'package:mobile_english_learning/views/classroom/classroom_detail.dart';
+import 'package:mobile_english_learning/views/classroom/home_teacher_classroom.dart';
+import 'package:mobile_english_learning/views/home_auth_teacher.dart';
+import 'package:mobile_english_learning/views/main_layout_teacher.dart';
 import 'package:mobile_english_learning/views/quiz/quiz_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile_english_learning/utils/shared_prefs.dart';
@@ -54,12 +57,17 @@ QuizViewModels quizViewModels){
         GoRoute( 
           path: '/', 
           builder: (context, state) {
-            return authViewModel.isLoggedIn
-            ? const MainLayout()   // <-- navbar stays forever
-            : appStateViewModel.isFreshOpen
-                ? HomeScreen()
-                : AuthScreen();
-              },),
+            if (!authViewModel.isLoggedIn) {
+                return appStateViewModel.isFreshOpen ? HomeScreen() : AuthScreen();
+              }
+              // User is logged in
+            final groups = authViewModel.user!.data.user.groups;
+            if (groups[0] == 'Teachers') {
+              return MainLayoutTeacher(indexNeeded: 0);
+            } else {
+              return const MainLayout(); // Your navbar stays here intentionally
+            }
+          },),
         GoRoute(
           path: '/login',
           pageBuilder: (context, state) {
@@ -138,6 +146,20 @@ QuizViewModels quizViewModels){
           builder: (context, state) {
             return const MainLayout();
           },),
+
+        GoRoute(
+          path: '/teacher/classrooms',
+          builder: (context, state) {
+            return ClassroomHomeTeacher();
+            },
+          ),
+
+        GoRoute( 
+          path: '/teacher/profile', 
+          builder: (context, state) {
+            return const MainLayoutTeacher(indexNeeded: 1);
+          },),
+          
 
 
 

@@ -92,7 +92,7 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
 
                                             DecoratedBox(
                                               decoration: BoxDecoration(
-                                                color:  Colors.green,
+                                                color: (quiz_list.result!.score>=50)? Colors.green : Colors.red,
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
                                               child: Container(
@@ -108,7 +108,7 @@ class _classrromDetailScreenState extends State<ClassroomDetailScreen>{
                                           
                                             const SizedBox(height: 4),
                                             Text(
-                                              quiz_list.result!.answered_at,
+                                              quiz_list.result!.answeredAt,
                                               style: const TextStyle(fontSize: 12, color: Colors.grey),
                                             ),
                                           ],

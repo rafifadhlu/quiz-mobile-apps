@@ -65,6 +65,51 @@ class ClassroomViewsModels extends ChangeNotifier{
     }
   }
 
+Future<void> createClassroom(CreateClassroomRequest request)async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+     try{
+      final response = await _repository.createClassroom(request);
+      _isSuccess = true;
+      debugPrint(response.className);
+
+      if (_classes != null) {
+      _classes!.data.add(response); // assuming classes.data is List<ClassroomData>
+      }
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+
+
+}
+
+Future<void> deleteClassroomByid(int id) async{
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.deleteClassroomsByid(id);
+      _isSuccess = true;
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+}
+
   void reset(){
     _classes= null;
     _details= null; 

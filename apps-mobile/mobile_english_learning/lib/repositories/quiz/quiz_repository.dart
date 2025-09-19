@@ -135,7 +135,7 @@ class QuizRepository {
         }
   }
 
-  Future<resultData> getResultSpecify(int classroomId,int quizID,int userID) async{
+  Future<ResultData> getResultSpecify(int classroomId,int quizID,int userID) async{
     var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizID/result/$userID');
       final _token = await SharedPrefUtils.readPrefStr('access_token');
 
@@ -150,7 +150,7 @@ class QuizRepository {
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         debugPrint(body.toString());
-        return resultData.fromJson(body);
+        return ResultData.fromJson(body);
       } else if (response.statusCode == 401) {
         // token expired → try refresh
         final newToken = await UserRepository().getNewAccessToken();
@@ -166,7 +166,7 @@ class QuizRepository {
 
           if (retryResponse.statusCode == 200) {
             final body = jsonDecode(retryResponse.body);
-            return resultData.fromJson(body);
+            return ResultData.fromJson(body);
           }
           }
           throw Exception('Unauthorized: Token expired and refresh failed');

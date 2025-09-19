@@ -15,23 +15,51 @@ class ClassroomRepository {
     await Future.delayed(Duration(seconds:2));
     var url = Uri.http(baseUrl, '/api/v1/classrooms/');
 
-    final response = await http.post(url, 
-    headers: {
-      'Content-Type': 'application/json', // Change to JSON
-      'Accept': 'application/json',
-      'Authorization': ?await SharedPrefUtils.readPrefStr('access_token'),
-    },
-    body: json.encode({  // Use json.encode
-        'class_name': request.className,
-      }),);
+    final token = await SharedPrefUtils.readPrefStr('access_token');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(request.toJson())
+    );
 
-    if(response.statusCode == 201){
-      final data = jsonDecode(response.body);
-      debugPrint("Decoded data: ${jsonEncode(data)}");
-      return ClassroomData.fromJson(data);
-    }else {
-      throw Exception('Failed to login: ${response.body}');
-    }
+    debugPrint(request.toString());
+    debugPrint(response.statusCode.toString());
+    debugPrint(response.body.toString());
+
+    if (response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+        return ClassroomData.fromJson(body);
+      } else if (response.statusCode == 401) {
+        // token expired → try refresh
+        final newToken = await UserRepository().getNewAccessToken();
+        if (newToken != null) {
+          final retryResponse = await http.post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json', // ✅ include Accept
+              'Authorization': 'Bearer $newToken',
+            },
+            body: json.encode(request.toJson()),
+          );
+
+          debugPrint('Retry Status: ${retryResponse.statusCode}');
+          debugPrint('Retry Body: ${retryResponse.body}');
+
+          if (retryResponse.statusCode == 201) {
+            final body = jsonDecode(retryResponse.body);
+            return ClassroomData.fromJson(body);
+          }
+        }
+
+        throw Exception('Unauthorized: Token expired and refresh failed');
+      } else {
+        throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
+      }
 
   }
   
@@ -114,5 +142,37 @@ class ClassroomRepository {
       }
 
 
+  }
+
+  Future<void> deleteClassroomsByid(int id) async{
+
+    var url = Uri.http(baseUrl, 'api/v1/classrooms/${id}/');
+      final _token = await SharedPrefUtils.readPrefStr('access_token');
+
+      debugPrint("Hit url.........");
+      final response = await http.delete(url,
+      headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+        });
+
+    if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        debugPrint("Status code : ${response.body}");
+      } else if (response.statusCode == 401) {
+        // token expired → try refresh
+        final newToken = await UserRepository().getNewAccessToken();
+        if (newToken != null) {
+          // retry the original request
+          final response = await http.delete(url,
+                headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+             });
+        }
+        throw Exception('Unauthorized: Token expired and refresh failed');
+      } else {
+        throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
+      }
   }
 }

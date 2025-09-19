@@ -32,6 +32,8 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
 
     final user = authViewModel.user;
     final classes = classViewModel.classes;
+    
+    
 
     return Column(
       children: <Widget> [
@@ -153,8 +155,52 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
 
                                         if (classes == null) 
                                           Container(
-                                            child: CircularProgressIndicator(),
-                                        )else if (classes.data.isEmpty) 
+                                        margin: const EdgeInsets.only(top: 30.0),
+                                        alignment: Alignment.centerLeft,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget> [
+                                            Text("Your",
+                                              style: TextStyle(
+                                                color: Theme.of(context).primaryColor,
+                                                fontFamily: "Frankrut",
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 30.0),),
+                                            Text("Classes",
+                                              style: TextStyle(
+                                                color: HexColor.fromHex("#38aef2"),
+                                                fontFamily: "Frankrut",
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 30.0),),
+
+                                            SizedBox(
+                                              height: 180,
+                                              child: 
+                                              Container(
+                                                alignment: Alignment.center,
+                                                constraints: BoxConstraints.tight(Size(350.0, 50.0)),
+                                                decoration: BoxDecoration(color: const Color.fromARGB(255, 224, 224, 224), borderRadius: BorderRadius.circular(20)),
+                                                      child: Row( 
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        children: [
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child:Icon(Icons.warning)),
+                                                        Expanded(
+                                                          flex: 4,
+                                                          child: 
+                                                          Text("No data available or you have not joined any classes",softWrap: true,)
+                                                          )
+                                                        
+                                                        ])
+                                                      
+                                                    )
+                                                  )                                                                                  
+                                                ],
+                                              ),
+                                            )
+                                        else if (classes.data.isEmpty) 
                                           Container(
                                             margin: const EdgeInsets.only(top: 30.0),
                                             alignment: Alignment.center,

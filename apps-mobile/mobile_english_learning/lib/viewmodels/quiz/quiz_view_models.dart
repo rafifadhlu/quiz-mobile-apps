@@ -48,7 +48,7 @@ class QuizViewModels extends ChangeNotifier{
       }
     }
 
-    debugPrint("Loaded quizzes: ${_quizzes!.data.length}");
+    debugPrint("Loaded quizzes:}");
     notifyListeners();
 
   } catch (e) {
@@ -111,7 +111,7 @@ class QuizViewModels extends ChangeNotifier{
 }
 
 
-  Future<resultData?> getResultSpecify(int classroomId, int quizID, int userID) async {
+  Future<ResultData?> getResultSpecify(int classroomId, int quizID, int userID) async {
   try {
     final response = await _repository.getResultSpecify(classroomId, quizID, userID);
     return response; // assuming repository returns resultData

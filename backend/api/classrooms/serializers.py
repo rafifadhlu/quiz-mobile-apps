@@ -7,7 +7,7 @@ class UserClassroomSerializer(serializers.ModelSerializer):
     Serializer for listing users in a classroom.
     """
     class_name = serializers.CharField(max_length=20)
-    teacher = serializers.CharField()
+    teacher = serializers.CharField(read_only=True);
 
     class Meta:
         model = classroom
