@@ -26,9 +26,14 @@ class choices(models.Model):
     choice_text = models.CharField(max_length=150)
     is_correct = models.BooleanField(default=False)
 
-class student_answers(models.Model):
-    student = models.ForeignKey(User,on_delete=models.CASCADE),
-    quiz = models.ForeignKey(quizzes,on_delete=models.CASCADE),
-    question = models.ForeignKey(questions,on_delete=models.CASCADE),
-    choice = models.ForeignKey(choices,on_delete=models.CASCADE),
+class QuizAttempt(models.Model):
+    student = models.ForeignKey(User,on_delete=models.CASCADE)
+    quiz = models.ForeignKey(quizzes,on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
     answered_at = models.DateField(auto_now=False, auto_now_add=True)
+
+class student_answers(models.Model):
+    question = models.ForeignKey(questions,on_delete=models.CASCADE)
+    quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE)
+    answer = models.ForeignKey(choices, on_delete=models.CASCADE)
+    is_correct = models.BooleanField(default=False)

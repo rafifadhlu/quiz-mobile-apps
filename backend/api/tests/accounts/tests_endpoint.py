@@ -51,7 +51,7 @@ class UserCreateViewTest(APITestCase):
 
 class UserRefreshTokenViewTest(APITestCase):
     """
-    User Refresh Token View TestCase /auth/token/refresh/
+    User Refresh Token View TestCase /auth/token/
     """
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
@@ -64,7 +64,7 @@ class UserRefreshTokenViewTest(APITestCase):
 
         refresh_token = user_login.data['data']['refresh']
 
-        res = self.client.post('/api/v1/auth/token/refresh/', {
+        res = self.client.post('/api/v1/auth/token/', {
             'refreshToken': refresh_token
         })
 
@@ -73,7 +73,7 @@ class UserRefreshTokenViewTest(APITestCase):
     def test_user_fail_refresh_token(self):
         refreshToken = 'invalid_token'
         
-        res = self.client.post('/api/v1/auth/token/refresh/', {
+        res = self.client.post('/api/v1/auth/token/', {
             'refreshToken': refreshToken
         })
         self.assertEqual(res.data['detail'], "Invalid or expired refresh token")

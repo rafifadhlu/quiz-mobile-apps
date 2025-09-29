@@ -2,12 +2,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics  import CreateAPIView,ListAPIView,UpdateAPIView,DestroyAPIView
+from rest_framework.generics  import CreateAPIView,ListAPIView,UpdateAPIView,DestroyAPIView,ListCreateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserListClassroomSerializer,UserCreateClassroomSerializer,UserAddClassroomMemberSerializer,UserClassroomMemberSerializer,UserCandidateClassroomSerializer,UserRemoveClassroomMemberSerializer
-
-from .permissions import IsStudent,IsTeacher
+from .serializers import UserClassroomSerializer,UserAddClassroomMemberSerializer,UserClassroomMemberSerializer,UserCandidateClassroomSerializer
+from .permissions import IsStudent,IsTeacher,IsTeacherOrReadOnly
 from rest_framework.permissions import IsAuthenticated
 
 from .models import classroom, classroom_member
@@ -15,27 +14,32 @@ from django.contrib.auth.models import Group, User
 
 # Create your views here.
 
-# All Role 
-class UserListClassroomView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserListClassroomSerializer
+class UserClassroomView(ListCreateAPIView):
+    permission_classes = [IsAuthenticated,IsTeacherOrReadOnly]
+    serializer_class = UserClassroomSerializer
 
     def get_queryset(self):
         user = self.request.user
-        # If teacher: return classrooms created by them
         if user.groups.filter(name="Teachers").exists():
-            return classroom.objects.filter(teacher=user)
+            return classroom.objects.filter(teacher=user).distinct()
+        return classroom.objects.filter(classroom_member__student=user).distinct()
 
-        # Default: no access
-        return classroom.objects.none()
-
-
-# Teacher Role
-
-# Classroom Related
-class UserCreateClassroomView(CreateAPIView):
-    permission_classes = [IsAuthenticated, IsTeacher]
-    serializer_class = UserCreateClassroomSerializer
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset() 
+        if queryset.exists():
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(status=status.HTTP_200_OK,
+                            data={
+                                "status":status.HTTP_200_OK,
+                                "message":"data fetched successfully",
+                                "data":serializer.data
+                            })
+        return Response(status=status.HTTP_404_NOT_FOUND,
+                        data={
+                            "status": status.HTTP_404_NOT_FOUND,
+                            "message":"No classrooms found for this user."
+                        })
 
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
@@ -67,30 +71,7 @@ class UserDeleteClassroomView(DestroyAPIView):
                             "message": "Classroom deleted successfully."
                         })
 
-class UserAddClassroomMemberView(CreateAPIView):
-    permission_classes = [IsAuthenticated, IsTeacher]
-    serializer_class = UserAddClassroomMemberSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['classroom_id'] = self.kwargs.get('classroom_id')
-        return context
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-   
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED,
-                            data={
-                                "status": status.HTTP_201_CREATED,
-                                "message": "Successfully added members to the classroom.",
-                                "data": serializer.data
-                            })
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class UserViewClassroomMemberView(ListAPIView):
+class UserClassroomDetailView(ListAPIView):
     """
     API endpoint for listing all members of a classroom.
     """
@@ -118,7 +99,7 @@ class UserViewClassroomMemberView(ListAPIView):
                             "detail": "No members found for this classroom."
                         })
 
-class UserSeeCandidateClassroomView(ListAPIView):
+class UserCandidateClassroomView(ListCreateAPIView):
     """
     API endpoint for viewing a candidate's classroom.
     """
@@ -127,6 +108,31 @@ class UserSeeCandidateClassroomView(ListAPIView):
 
     def get_queryset(self):
         return User.objects.filter(groups__name="Students")
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return UserAddClassroomMemberSerializer
+        if self.request.method == 'GET':
+            return UserCandidateClassroomSerializer
+        
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['classroom_id'] = self.kwargs.get('classroom_id')
+        return context
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+   
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED,
+                            data={
+                                "status": status.HTTP_201_CREATED,
+                                "message": "Successfully added members to the classroom.",
+                                "data": serializer.data
+                            })
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -157,17 +163,15 @@ class UserRemoveClassroomMemberView(APIView):
     
     def delete(self, request,*args, **kwargs):
         classroom_id = self.kwargs.get('classroom_id')
-        serializer = UserRemoveClassroomMemberSerializer(data=request.data, context={'classroom_id': classroom_id})
+        student_id = self.kwargs.get('student_id')
+        self.get_queryset().filter(student_id=student_id, classroom_id=classroom_id).delete()
 
-        serializer.is_valid(raise_exception=True)
-        student_ids = serializer.validated_data.get('students', [])
-        self.get_queryset().filter(student_id__in=student_ids).delete()
 
         return Response(status=status.HTTP_200_OK,
                         data={
                             "status": status.HTTP_200_OK,
-                            "message": f"Removed {len(student_ids)} students from classroom {classroom_id}.",
+                            "message": f"Removed a student from classroom {classroom_id}.",
                             "data" : {
-                                "member_removed" : student_ids
+                                "member_removed" : student_id
                             }
                         })

@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project
 COPY . .
+COPY .env.prod .
 
 # set env to production
 ARG ENV=prod
