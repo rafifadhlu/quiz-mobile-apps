@@ -11,7 +11,7 @@ pipeline {
             steps {
                 git(
                     url: 'https://github.com/rafifadhlu/quiz-mobile-apps.git',
-                    branch: "${env.BRANCH_NAME}",      // Jenkins auto sets this
+                    branch: "dev/backend",      // Jenkins auto sets this
                     credentialsId: 'github-cred-fdr'   // your GitHub PAT creds
                 )
             }
