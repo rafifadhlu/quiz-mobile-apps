@@ -6,6 +6,14 @@ pipeline {
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
+        stages {
+        stage('Checkout') {
+            steps {
+                // Ensures Jenkins clones the repo properly with credentials
+                checkout scm
+            }
+        }
+
     stages {
         stage('Setup') {
             steps {
