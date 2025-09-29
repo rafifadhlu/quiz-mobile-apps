@@ -6,7 +6,6 @@ pipeline {
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
     
-
     stages {
         stage('setup') {
             steps {
