@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = 'venv',
+        VENV_DIR = 'venv'
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
