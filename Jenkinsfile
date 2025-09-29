@@ -43,12 +43,18 @@ pipeline {
             when {
                 branch 'main'
             }
-             steps {
-                // stop old containers and restart with new code
-                sh "docker compose -f ${DOCKER_COMPOSE_FILE} down"
-                sh "docker compose -f ${DOCKER_COMPOSE_FILE} up -d"
+            steps {
+                script {
+                    sh '''
+                        echo "Deploying Django service... 🚀"
+                        cd /home/devops/infra
+                        docker compose build django
+                        docker compose up -d django
+                    '''
+                }
             }
         }
+
 
     }
 }
