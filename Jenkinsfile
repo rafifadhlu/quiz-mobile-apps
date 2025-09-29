@@ -5,6 +5,7 @@ pipeline {
         VENV_DIR = 'venv'
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
+    
 
     stages {
         stage('setup') {
