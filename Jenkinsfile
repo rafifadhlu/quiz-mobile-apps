@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    
+    tools {
+        git 'Default'   // 👈 matches the name you set in "Git installations"
+    }
 
     environment {
         VENV_DIR = 'venv'
