@@ -1,20 +1,25 @@
 pipeline {
     agent any
-    
-    tools {
-        git 'Default'   // 👈 matches the name you set in "Git installations"
-    }
 
     environment {
         VENV_DIR = 'venv'
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
-    
+
     stages {
-        stage('setup') {
+        stage('Checkout') {
+            steps {
+                git(
+                    url: 'https://github.com/rafifadhlu/quiz-mobile-apps.git',
+                    branch: "${env.BRANCH_NAME}",      // Jenkins auto sets this
+                    credentialsId: 'github-cred-fdr'   // your GitHub PAT creds
+                )
+            }
+        }
+
+        stage('Setup') {
             steps {
                 script {
-                    // Setup steps go here
                     sh '''
                         echo "Setting up the environment... 🔧🔧🔧"
                         cd backend
@@ -31,7 +36,6 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Test steps go here
                     sh '''
                         echo "Running tests... 🔍🔍🔍"
                         cd backend
@@ -45,7 +49,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                branch 'main'
+                branch 'main'   // only deploy if merge goes to main
             }
             steps {
                 script {
@@ -54,11 +58,10 @@ pipeline {
                         cd /home/devops/infra
                         docker compose build django
                         docker compose up -d django
+                        echo "Deployment finished ✅"
                     '''
                 }
             }
         }
-
-
     }
 }
