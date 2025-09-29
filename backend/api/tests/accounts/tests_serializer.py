@@ -17,7 +17,7 @@ class UserAuthSerializerTests(TestCase):
             'password': 'testpassword'
         })
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data, self.user)
+        self.assertEqual(serializer.validated_data['user'], self.user)
 
     def test_user_fail_auth(self):
         serializer = UserAuthSerializer(data={

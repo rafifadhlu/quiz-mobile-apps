@@ -22,7 +22,7 @@ class UserListClassroomTest(APITestCase):
 
         self.access_token = user_logged_in.data['data']['access']
 
-        response = self.client.post('/api/v1/classrooms/create/', {
+        response = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.user.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
@@ -52,7 +52,7 @@ class UserCreateClassroomTest(APITestCase):
 
         self.access_token = user_logged_in.data['data']['access']
 
-        response = self.client.post('/api/v1/classrooms/create/', {
+        response = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.user.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
@@ -76,7 +76,7 @@ class UserDeleteClassroomTest(APITestCase):
 
         self.access_token = user_logged_in.data['data']['access']
 
-        response = self.client.post('/api/v1/classrooms/create/', {
+        response = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
@@ -84,7 +84,7 @@ class UserDeleteClassroomTest(APITestCase):
 
     def test_delete_classroom(self):
         instance = 1
-        res = self.client.delete(f'/api/v1/classrooms/{instance}/delete/', 
+        res = self.client.delete(f'/api/v1/classrooms/{instance}/', 
                                 HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
         
         self.assertEqual(res.data['status'], 200)
@@ -118,7 +118,7 @@ class UserAddClassroomMemberTest(APITestCase):
         
         self.access_token = teacher_logged_in.data['data']['access']
 
-        response = self.client.post('/api/v1/classrooms/create/', {
+        response = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
@@ -128,7 +128,7 @@ class UserAddClassroomMemberTest(APITestCase):
 
         instance = classroom.objects.get(teacher=self.teacher.id)
 
-        response = self.client.post(f'/api/v1/classrooms/{instance.id}/add/', 
+        response = self.client.post(f'/api/v1/classrooms/{instance.id}/candidate/', 
                                     data, 
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
         
@@ -142,7 +142,7 @@ class UserAddClassroomMemberTest(APITestCase):
         
         self.access_token = teacher_logged_in.data['data']['access']
 
-        response = self.client.post('/api/v1/classrooms/create/', {
+        response = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
@@ -151,7 +151,7 @@ class UserAddClassroomMemberTest(APITestCase):
 
         instance = classroom.objects.get(teacher=self.teacher.id)
 
-        response = self.client.post(f'/api/v1/classrooms/{instance.id}/add/', 
+        response = self.client.post(f'/api/v1/classrooms/{instance.id}/candidate/', 
                                     data, 
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
         
@@ -186,7 +186,7 @@ class UserViewClassroomMemberTest(APITestCase):
         
         self.access_token = teacher_logged_in.data['data']['access']
 
-        create_classroom = self.client.post('/api/v1/classrooms/create/', {
+        create_classroom = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
@@ -196,11 +196,11 @@ class UserViewClassroomMemberTest(APITestCase):
 
         instance = classroom.objects.get(teacher=self.teacher.id)
 
-        add_member_classroom = self.client.post(f'/api/v1/classrooms/{instance.id}/add/', 
+        add_member_classroom = self.client.post(f'/api/v1/classrooms/{instance.id}/candidate', 
                                     data, 
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
         
-        response = self.client.get(f'/api/v1/classrooms/{instance.id}/members/', 
+        response = self.client.get(f'/api/v1/classrooms/{instance.id}/candidate/', 
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
         
         self.assertEqual(response.status_code, 200)
@@ -234,7 +234,7 @@ class UserSeeCandidateClassroomTest(APITestCase):
         
         self.access_token = teacher_logged_in.data['data']['access']
 
-        create_classroom = self.client.post('/api/v1/classrooms/create/', {
+        create_classroom = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
@@ -273,7 +273,7 @@ class UserRemoveClassroomTest(APITestCase):
         
         self.access_token = teacher_logged_in.data['data']['access']
 
-        create_classroom = self.client.post('/api/v1/classrooms/create/', {
+        create_classroom = self.client.post('/api/v1/classrooms/', {
             'class_name': 'English 10.1',
             'teacher': self.teacher.id
         }, HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
@@ -283,25 +283,17 @@ class UserRemoveClassroomTest(APITestCase):
 
         self.instance = classroom.objects.get(teacher=self.teacher.id)
 
-        add_member = self.client.post(f'/api/v1/classrooms/{self.instance.id}/add/', 
+        add_member = self.client.post(f'/api/v1/classrooms/{self.instance.id}/candidate/', 
                                     self.data, 
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
 
-    def test_remove_classroom(self):
-        data = {
-            'students' : [2],
-        }
+    def test_remove_student_classroom(self):
 
-        res = self.client.delete(f'/api/v1/classrooms/{self.instance.id}/remove-member/', 
-                                    data, 
+        res = self.client.delete(f'/api/v1/classrooms/{self.instance.id}/members/{2}/',
                                     HTTP_AUTHORIZATION=f'Bearer {self.access_token}',format="json")
-        
-        self.assertEqual(res.data['status'],200)
-        
-        
 
+        self.assertEqual(res.status_code, 200)
 
-    
 
 
 
