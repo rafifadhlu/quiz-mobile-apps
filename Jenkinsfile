@@ -7,10 +7,19 @@ pipeline {
     }
 
     stages {
-        stage('setup') {
+        stage('Checkout') {
+            steps {
+                git(
+                    url: 'https://github.com/rafifadhlu/quiz-mobile-apps.git',
+                    branch: "dev/backend",      // Jenkins auto sets this
+                    credentialsId: 'github-cred-fdr'   // your GitHub PAT creds
+                )
+            }
+        }
+
+        stage('Setup') {
             steps {
                 script {
-                    // Setup steps go here
                     sh '''
                         echo "Setting up the environment... 🔧🔧🔧"
                         cd backend
@@ -27,7 +36,6 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Test steps go here
                     sh '''
                         echo "Running tests... 🔍🔍🔍"
                         cd backend
@@ -41,14 +49,19 @@ pipeline {
 
         stage('Deploy') {
             when {
-                branch 'main'
+                branch 'main'   // only deploy if merge goes to main
             }
-             steps {
-                // stop old containers and restart with new code
-                sh "docker compose -f ${DOCKER_COMPOSE_FILE} down"
-                sh "docker compose -f ${DOCKER_COMPOSE_FILE} up -d"
+            steps {
+                script {
+                    sh '''
+                        echo "Deploying Django service... 🚀"
+                        cd /home/devops/infra
+                        docker compose build django
+                        docker compose up -d django
+                        echo "Deployment finished ✅"
+                    '''
+                }
             }
         }
-
     }
 }
