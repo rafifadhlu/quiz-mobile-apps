@@ -6,17 +6,6 @@ pipeline {
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git(
-                    url: 'https://github.com/rafifadhlu/quiz-mobile-apps.git',
-                    branch: "dev/backend",      // Jenkins auto sets this
-                    credentialsId: 'github-cred-fdr'   // your GitHub PAT creds
-                )
-            }
-        }
-
         stage('Setup') {
             steps {
                 script {
