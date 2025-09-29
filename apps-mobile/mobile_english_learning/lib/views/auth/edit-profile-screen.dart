@@ -76,7 +76,7 @@ class _editProfileScreenState extends State<editProfileScreen>{
         children: [
           Text("Profile"),
           TextButton(onPressed: handleEdit
-          , child: Text("Edit"))
+          , child: Text("Edit"),)
         ],
       ),
       leading:Builder(
@@ -248,10 +248,10 @@ class _editProfileScreenState extends State<editProfileScreen>{
                                 }
                               },
                         child: authViewModel.isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(color: Theme.of(context).primaryColor,strokeWidth: 2.0,),
                               )
                             : const Text("Save",style: TextStyle(color: Colors.white),),
                       )

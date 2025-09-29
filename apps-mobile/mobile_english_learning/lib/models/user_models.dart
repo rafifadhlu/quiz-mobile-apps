@@ -246,6 +246,15 @@ class updateProfileData{
     );
   }
 
+   factory updateProfileData.fromUser(User user) {
+    return updateProfileData(
+      username: user.username,
+      email: user.email,
+      first_name: user.firstname,   // User model uses 'firstname'
+      last_name: user.lastname,     // User model uses 'lastname'
+    );
+  }
+
     Map<String, dynamic> toJson(){
       return {
         'email': email ?? '',

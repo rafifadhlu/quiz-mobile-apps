@@ -1,5 +1,6 @@
-import os
 from supabase import create_client
+import os
+from urllib.parse import urlparse
 
 # def get_signed_url(file_path):
 #     # First debug the path
@@ -33,12 +34,20 @@ def get_signed_urls(file_names):
         print("Error getting signed url:",e)
         return None
 
-def delete_file(file_path):
+def delete_file(file_path: str):
     supabase = connect_supabase()
     media_bucket = os.getenv("SUPABASE_MEDIA_BUCKET")
 
+    # 🔧 Strip bucket name if it's included in the path
+    if file_path.startswith(f"{media_bucket}/"):
+        file_path = file_path.replace(f"{media_bucket}/", "", 1)
+
+    print(f"🗑 Attempting to delete from Supabase bucket '{media_bucket}': {file_path}")
+
     try:
         response = supabase.storage.from_(media_bucket).remove([file_path])
+        print(f"✅ Supabase delete response: {response}")
         return response
     except Exception as e:
+        print(f"❌ Supabase delete failed: {e}")
         return str(e)

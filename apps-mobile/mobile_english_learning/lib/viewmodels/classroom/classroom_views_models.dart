@@ -17,6 +17,9 @@ class ClassroomViewsModels extends ChangeNotifier{
   GetDetailsClassroomResponse? get details => _details;
   GetDetailsClassroomResponse? _details;
 
+  List<candidateClassroomData>? get candidateStudents => _candidateStudents;
+  List<candidateClassroomData>? _candidateStudents;
+
   bool _isSuccess = false;
   
   bool get isLoading => _isLoading;
@@ -109,6 +112,65 @@ Future<void> deleteClassroomByid(int id) async{
       notifyListeners();
     }
 }
+
+  Future<void> getCandidateClassrooms(int classroomID)async{
+     _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.getCandidateClassrooms(classroomID);
+      _candidateStudents = response.data;
+      _isSuccess = true;
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> addNewStudents(addCandidateRequest students,int classroomID)async{
+     _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.addNewStudents(students,classroomID);
+      _isSuccess = true;
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeStudentByid(int clasroomID,int userID) async{
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try{
+      final response = await _repository.removeStudent(clasroomID,userID);
+      _isSuccess = true;
+      notifyListeners();   
+    }catch(e){
+      _errorMessage = e.toString();
+      _isSuccess = false;
+      notifyListeners();
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
 
   void reset(){
     _classes= null;

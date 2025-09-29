@@ -8,6 +8,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from utils.supabaseServices import delete_file,get_signed_urls
+import os
+from urllib.parse import urlparse
+
 
 
 # from .serializers import
@@ -210,30 +213,54 @@ class UserDeleteQuestion(DestroyAPIView):
     def get_object(self):
         question_id = self.kwargs.get("question_id")
         return get_object_or_404(questions, id=question_id)
-
+    
     def perform_destroy(self, instance):
         if instance.question_image:
-            delete_file(instance.question_image.url)
-        
-        return super().perform_destroy(instance) 
+            # Prefer the FieldFile.name which is the bucket-relative path
+            file_path = getattr(instance.question_image, 'name', None)
+
+            # Fallback: if name is missing, try to extract from URL
+            if not file_path:
+                file_url = str(instance.question_image.url)
+                bucket_name = os.getenv("SUPABASE_MEDIA_BUCKET")
+                parsed = urlparse(file_url)
+                # parsed.path looks like: /storage/v1/s3/dev-media/image/3_file.jpg
+                # remove up to "/{bucket}/"
+                marker = f"/{bucket_name}/"
+                if marker in parsed.path:
+                    file_path = parsed.path.split(marker, 1)[1]
+                else:
+                    # last resort: use only filename
+                    file_path = os.path.basename(parsed.path)
+
+            print(f"Full url: {getattr(instance.question_image, 'url', None)}")
+            print(f"Using file_path for Supabase remove: {file_path}")
+
+            delete_file(file_path)
+
+        return super().perform_destroy(instance)
+
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
         deleted_data = {
             "id": instance.id,
-            "question_text": instance.question_text,  # adjust field names as needed
-            "question_image": instance.question_image if instance.question_image else None,
+            "question_text": instance.question_text,
+            "question_image": instance.question_image.url if instance.question_image else None,
         }
-        
 
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_200_OK,
-                        data={
-                            "status": status.HTTP_200_OK,
-                            "message": "Question deleted successfully.",
-                            "data": deleted_data
-                        })
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "status": status.HTTP_200_OK,
+                "message": "Question deleted successfully.",
+                "data": deleted_data,
+            },
+        )
+
 
 class UserSubmitQuizzes(ListCreateAPIView):
     permission_classes = [IsAuthenticated,IsStudent]

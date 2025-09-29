@@ -104,7 +104,7 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                               child: Center(
                                 child: Column(
                                   children:<Widget> [
-                                    CircularProgressIndicator(),
+                                    CircularProgressIndicator(color: Theme.of(context).primaryColor,),
                                     Text("Loading User Data")
                                   ],
                                 ),

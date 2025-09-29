@@ -56,13 +56,52 @@ Future<void> playToggle(String url) async {
     super.dispose();
   }
 
- @override
-   Widget build(BuildContext context) {
-    final questionsViewModels = context.watch<QuizViewModels>();
-    final questions = questionsViewModels.questions;
-    debugPrint("FROM LAYOUT : ${widget.classroomID}");
+   @override
+    Widget build(BuildContext context) {
+      final questionsViewModels = context.watch<QuizViewModels>();
+      final questions = questionsViewModels.questions;
+      debugPrint("FROM LAYOUT : ${widget.classroomID}");
 
-    
+      // 👇 early return if still loading
+      if (questions == null) {
+        return Scaffold(
+          body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor,)),
+        );
+      }else if(questions.data.isEmpty){
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 250, // 👈 like Excel column width
+                  padding: const EdgeInsets.all(8),
+                  child: const Text(
+                    "Sorry, currently there is no questions please wait for your teacher",
+                    softWrap: true, // 👈 auto-wrap lines
+                    textAlign: TextAlign.center, // 👈 center-align text
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ElevatedButton(onPressed: (){
+                  context.go('/classrooms/detail/${widget.classroomID}');
+                }, child: Text("Back to the classrooms",style: TextStyle(color: Theme.of(context).primaryColor),))
+              ],
+            ),
+          )
+        );
+      }
+
+      // ✅ now it's safe to access questions.data
+      final eachQuestion = questions.data[_currentIndexQuestions];
+
+      List<Map<String, dynamic>> choicesList = eachQuestion.choices_list
+          .map((c) => {"id": c.id, "choice_text": c.choice_text})
+          .toList();
+
       void getAnswerData(int questionId, int quizId, int answerId) {
         debugPrint("Successfully get question id: $questionId quiz id: $quizId answer id: $answerId ");
         setState(() {
@@ -70,126 +109,112 @@ Future<void> playToggle(String url) async {
         });
 
         final answerReq = answerDataRequest(
+          quiz_id: quizId,
+          question_id: questionId,
+          answer_id: answerId,
+        );
+
+        context.read<QuizViewModels>().submitUserAnswer(
+          answerReq,
+          int.parse(widget.classroomID),
+          int.parse(widget.quizID),
+        );
+      }
+
+      void showEndMessage(int questionId, int quizId, int answerId) {
+        final parentContext = context; // save before opening dialog
+        showDialog(
+          context: parentContext,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text("Submit Quiz"),
+              content: const Text("Are you sure you want to submit your answers?"),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+
+                     final answerReq = answerDataRequest(
                           quiz_id: quizId,
                           question_id: questionId,
                           answer_id: answerId,
                         );
 
                         // call your provider to submit
-        context
-          .read<QuizViewModels>()
-          .submitUserAnswer(answerReq, int.parse(widget.classroomID), int.parse(widget.quizID));
+                        context
+                            .read<QuizViewModels>()
+                            .submitUserAnswer(answerReq, int.parse(widget.classroomID), int.parse(widget.quizID));
 
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Quiz submitted!",
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    );
+
+                    Future.delayed(const Duration(seconds: 3), () {
+                      parentContext.go('/classrooms');
+                    });
+                  },
+                  child: const Text("Submit"),
+                ),
+              ],
+            );
+          },
+        );
       }
 
-
-        void showEndMessage(int questionId, int quizId, int answerId) {
-            final parentContext = context; // save before opening dialog
-
-            showDialog(
-              context: parentContext,
-              barrierDismissible: false,
-              builder: (BuildContext dialogContext) {
-                return AlertDialog(
-                  title: const Text("Submit Quiz"),
-                  content: const Text("Are you sure you want to submit your answers?"),
-                  actions: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(); // close dialog first
-
-                        // final answerReq = answerDataRequest(
-                        //   quiz_id: quizId,
-                        //   question_id: questionId,
-                        //   answer_id: answerId,
-                        // );
-
-                        // call your provider to submit
-                        // context
-                        //     .read<QuizViewModels>()
-                        //     .submitUserAnswer(answerReq, int.parse(widget.classroomID), int.parse(widget.quizID));
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Quiz submitted!",
-                              style: TextStyle(color: Colors.green),
-                            ),
-                          ),
-                        );
-
-                        Future.delayed(const Duration(seconds: 3), () {
-                          parentContext.go('/classrooms');
-                        });
-                      },
-                      child: const Text("Submit"),
-                    ),
-                  ],
-                );
-              },
-            );
-          }
-
-      final eachQuestion = questions!.data[_currentIndexQuestions];
-
-      List<Map<String, dynamic>> choicesList = eachQuestion.choices_list
-          .map((c) => {"id": c.id, "choice_text": c.choice_text})
-          .toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Brain Boost",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+        body: Stack(
+          alignment: Alignment.center,
           children: [
-            Text(
-              "Brain Boost",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10.0,
-
-              ),)
-          ],
-        ),
-      ),
-    body: Stack(
-      alignment: Alignment.center,
-      children: [
-        // 🌈 Background gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white.withOpacity(0.5),
-                const Color.fromARGB(255, 0, 85, 212).withOpacity(0.8),
-              ],
-            ),
-          ),
-        ),
-
-        // 🖼️ Fixed centered logo (watermark style)
-        IgnorePointer(
-          child: Opacity(
-            opacity: 0.15,
-            child: Image.asset(
-              "assets/icons/logo-fix.png",
-              width: 220,
-              height: 220,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-
-        SafeArea(
-          child: 
+            // 🌈 Background gradient
             Container(
-              child: 
-              Column(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.5),
+                    const Color.fromARGB(255, 0, 85, 212).withOpacity(0.8),
+                  ],
+                ),
+              ),
+            ),
+
+            // 🖼️ Watermark
+            IgnorePointer(
+              child: Opacity(
+                opacity: 0.15,
+                child: Image.asset(
+                  "assets/icons/logo-fix.png",
+                  width: 220,
+                  height: 220,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+
+            SafeArea(
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                    QuestionCard(
+                  QuestionCard(
                     quizId: int.parse(widget.quizID),
                     id: eachQuestion.id,
                     classroomId: int.parse(widget.classroomID),
@@ -202,24 +227,18 @@ Future<void> playToggle(String url) async {
                     buttonLabel: "Next",
                     functionOperation: getAnswerData,
                     currentIndex: _currentIndexQuestions,
-                    maxLen: questions!.data.length - 1,
+                    maxLen: questions.data.length - 1,
                     endLabel: "Submit",
                     onPressed: playToggle,
-                    onSubmit: showEndMessage, // 👈 parent handles it now
+                    onSubmit: showEndMessage,
                   )
-
                 ],
-              )
-              ,
-            )
-          )
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-
-
-      ],
-    ),
-  
-  );
-}
 
 }

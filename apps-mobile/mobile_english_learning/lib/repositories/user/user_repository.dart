@@ -5,7 +5,8 @@ import 'package:mobile_english_learning/models/user_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRepository {
-  static const String baseUrl = '10.0.2.2:8000';
+  // static const String baseUrl = '10.0.2.2:8000';
+  static const String baseUrl = '192.168.1.9:8000';
 
   Future<LoginResponse> login(LoginRequest request) async{
     await Future.delayed(Duration(seconds:2));
@@ -81,7 +82,7 @@ class UserRepository {
     }
   }
 
-  Future<User> updateProfile(updateProfileData request,int userID) async{
+  Future<updateProfileData> updateProfile(updateProfileData request,int userID) async{
       var url = Uri.http(baseUrl, '/api/v1/auth/profile/$userID/');
 
       final response = await http.put(
@@ -98,7 +99,7 @@ class UserRepository {
           final data = jsonDecode(response.body);
            debugPrint("Raw Data: ${jsonEncode(data)}");
 
-          return User.fromJson(data);
+          return updateProfileData.fromJson(data);
         }else {
           throw Exception("Failed to fetch profile data: ${response.body}");
         }

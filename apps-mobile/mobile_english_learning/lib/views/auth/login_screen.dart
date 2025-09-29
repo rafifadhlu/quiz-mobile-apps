@@ -210,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   if(authViewModel.isLoading)
                                     Column(
                                       children: [
-                                        const CircularProgressIndicator(),
+                                        CircularProgressIndicator(color: Theme.of(context).primaryColor,),
                                         SizedBox(height: 8),
                                         Text("Logging in...", style: TextStyle(color: Colors.white)),
                                       ],

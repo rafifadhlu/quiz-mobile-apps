@@ -75,6 +75,13 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setUser(LoginResponse user) {
+    _user = user; // Keep original user data intact
+    // Initialize profile from user data
+    _profile = updateProfileData.fromUser(user.data.user);
+    notifyListeners();
+  }
+
 
   Future<void> login(String username, String password) async {
   _isLoading = true;
@@ -85,6 +92,7 @@ class AuthViewModel extends ChangeNotifier {
     final request = LoginRequest(username: username, password: password);
     final response = await _repository.login(request);
     final groups = response.data.user.groups;
+    setUser(response);
 
     debugPrint('Role :{$groups}');
 
@@ -163,27 +171,66 @@ class AuthViewModel extends ChangeNotifier {
       }
   }
 
-  Future<void> updateProfile(updateProfileData request,int userID)async {
-      _isLoading = true;
+   Future<bool> updateProfile(updateProfileData request, int userID) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Send update to API
+      await _repository.updateProfile(request, userID);
+      
+      // ✅ Simple: Just update the profile data for display
+      _profile = request;
+      
+      debugPrint('✅ Profile updated successfully');
+      debugPrint('✅ User auth data preserved: ID=${_user?.data.user.id}, Groups=${_user?.data.user.groups}');
+      
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      debugPrint("❌ Update profile error: $_errorMessage");
+      return false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
-      try {
-        final response = await _repository.updateProfile(request,userID);
-        user!.data.user = response;
-        _errorMessage = null;
-        notifyListeners();
-      } catch (e) {
-        _errorMessage = e.toString();
-        notifyListeners();
-      } finally {
-        _isLoading = false;
-        notifyListeners();
+    }
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // Display helpers - use profile data when available
+  String get displayName {
+    if (_profile != null) {
+      final firstName = _profile!.first_name ?? '';
+      final lastName = _profile!.last_name ?? '';
+      
+      if (firstName.isNotEmpty || lastName.isNotEmpty) {
+        return '$firstName $lastName'.trim();
       }
+      return _profile!.username ?? 'Unknown User';
+    }
+    
+    // Fallback to user data
+    if (_user != null) {
+      final user = _user!.data.user;
+      if (user.firstname.isNotEmpty || user.lastname.isNotEmpty) {
+        return '${user.firstname} ${user.lastname}'.trim();
+      }
+      return user.username;
+    }
+    
+    return 'Unknown User';
   }
 
   void resetState() {
     _errorMessage = null;
     _isLoading = false;
     _isSuccess = false;
+    // _profile = null;
     notifyListeners();
   }
 

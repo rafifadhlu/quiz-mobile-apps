@@ -1,5 +1,23 @@
-
 import 'dart:ffi';
+
+import 'package:flutter/foundation.dart';
+
+
+/// Create Quizzez
+class quizzezRequest{
+  final String quizName;
+
+  quizzezRequest({
+    required this.quizName,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'quiz_name': quizName,
+    };
+  }
+}
+
 
 /// GET all quizes belongs to user
 class getQuizzesResponse {
@@ -218,6 +236,115 @@ class ResultData {
       'student': student,
       'quiz': quiz,
     };
+  }
+}
+
+// [{"question_text":"Add another question at 10/9","question_audio":null,"question_image":null,"choices":[{"choice_text":"yes","is_correct":false},{"choice_text":"no","is_correct":true}]}]
+
+
+class QuestionRequest {
+  final String question_text;
+  final String? question_audio;
+  final String? question_image;
+  final List<choiceDataRequest> choices;
+
+  QuestionRequest({
+    required this.question_text,
+    this.question_audio,
+    this.question_image,
+    required this.choices,
+  });
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'question_text': question_text,
+      'choices': choices.map((c) => c.toJson()).toList(),
+    };
+    if (question_audio != null) data['question_audio'] = question_audio;
+    if (question_image != null) data['question_image'] = question_image;
+    return data;
+  }
+}
+
+
+
+class choiceDataRequest{
+  final String choice_text;
+  final bool is_correct;
+
+  choiceDataRequest({
+    required this.choice_text,
+    required this.is_correct
+  });
+
+  factory choiceDataRequest.fromJson(Map<String, dynamic> json) {
+    return choiceDataRequest(
+      choice_text: json['choice_text'],
+      is_correct: json['is_correct']
+    );
+  }
+
+
+  Map<String, dynamic> toJson() => {
+        "choice_text": choice_text,
+        "is_correct": is_correct,
+      };
+}
+
+
+class addQuestionResult {
+  final int? status;
+  final String? message;
+  final dynamic errors;
+
+  addQuestionResult({
+    this.status,
+    this.message,
+    this.errors,
+  });
+
+  factory addQuestionResult.fromJson(Map<String, dynamic> json) {
+    return addQuestionResult(
+      status: json['status'] is int ? json['status'] : null,
+      message: json['message'],
+      errors: json['errors'],
+    );
+  }
+}
+
+class QuestionData {
+  final String question_text;
+  final String? question_audio;
+  final String? question_image;
+  final List<choiceDataRequest> choices;
+
+  QuestionData({
+    required this.question_text,
+    this.question_audio,
+    this.question_image,
+    required this.choices,
+  });
+
+  factory QuestionData.fromJson(Map<String, dynamic> json) {
+    return QuestionData(
+      question_text: json['question_text'],
+      question_image: json['question_image_url'],
+      question_audio: json['question_audio_url'],
+      choices: (json['choices_list'] as List<dynamic>)
+          .map((choiceJson) => choiceDataRequest.fromJson(choiceJson))
+          .toList(),
+    );
+  }
+
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'question_text': question_text,
+      'choices': choices.map((c) => c.toJson()).toList(),
+    };
+    if (question_audio != null) data['question_audio'] = question_audio;
+    if (question_image != null) data['question_image'] = question_image;
+    return data;
   }
 }
 

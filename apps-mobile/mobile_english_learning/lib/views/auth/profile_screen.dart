@@ -18,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     final user = authViewModel.user;
+    final profile = authViewModel.profile;
 
     void _handleProfile(){
       debugPrint('Clicked.........');
@@ -67,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen>{
                           
                           // Username
                           Text(
-                            user.data.user.firstname + " " + user.data.user.lastname,
+                            authViewModel.displayName,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

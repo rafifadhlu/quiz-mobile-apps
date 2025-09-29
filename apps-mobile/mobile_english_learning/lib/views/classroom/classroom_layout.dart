@@ -27,8 +27,15 @@ class _MemberScreenState extends State<MemberScreen>{
    @override
   Widget build(BuildContext context) {
     final classroom =  context.read<ClassroomViewsModels>();
-    final students =  classroom.details!;
+    final students =  classroom.details;
 
+     if (students == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     return Container(
       color: Colors.white, // background white
       height: MediaQuery.of(context).size.height * 0.6, // or specify a fixed height like 400
@@ -98,11 +105,21 @@ class _ClassroomLayoutState extends State<ClassroomLayout> {
     final classroom = classroomViewsModels.details;
 
    if (classroom == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return Scaffold(
+        body: Container(
+                    padding: const EdgeInsets.only(
+                        left: 20.0, right: 20.0, top: 20.0),
+                    child: const Center(
+                      child: Column(
+                        children: const <Widget>[
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text("Loading students..."),
+                        ],
+                      ),
+                    ),
+                  ),
+        );
     }
 
     if (classroom.data.isEmpty) {

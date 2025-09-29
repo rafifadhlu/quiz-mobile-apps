@@ -23,11 +23,12 @@ class HomeTeacherScreen extends StatefulWidget{
 class _homeTeacherScreenState extends State<HomeTeacherScreen>{
   final Color fontcolor = HexColor.fromHex("#102f74");
 
+
   @override
   void initState() {
-    // TODO: implement initState
+    Future.microtask(() =>{
+      context.read<AuthViewModel>().user});
     super.initState();
-    context.read<AuthViewModel>();
   }
 
 
@@ -63,10 +64,14 @@ class _homeTeacherScreenState extends State<HomeTeacherScreen>{
                                           ),
                                 child: Row(
                                           children: [
+                                            (authViewModel.user == null)
+                                            ? Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor,))
+                                               
+                                            :
                                                 Icon(Icons.account_circle_outlined,color: Theme.of(context).primaryColor),
                                                 SizedBox(width: 8),
                                                 Text(
-                                                    "Hai, ${user!.data.user.firstname} ${user!.data.user.lastname}",
+                                                    "Hi, ${authViewModel.displayName}",
                                                     style: TextStyle(
                                                         fontSize: 14,
                                                         fontWeight: FontWeight.w500,

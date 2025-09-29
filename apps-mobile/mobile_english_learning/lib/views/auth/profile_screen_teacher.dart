@@ -14,10 +14,12 @@ class ProfileScreenTeacher extends StatefulWidget {
 }
 
 class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
+
   @override
   Widget build(BuildContext context) {
     final authViewModel = context.watch<AuthViewModel>();
     final user = authViewModel.user;
+    final profile = authViewModel.profile;
 
     void _handleProfile(){
       debugPrint('Clicked.........');
@@ -72,7 +74,7 @@ class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
                           
                           // Username
                           Text(
-                            user.data.user.firstname + " " + user.data.user.lastname,
+                            authViewModel.displayName,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

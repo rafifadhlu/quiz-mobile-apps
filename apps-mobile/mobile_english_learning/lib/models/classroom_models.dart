@@ -161,3 +161,73 @@ class Student {
     };
   }
 }
+
+class CandidateClassroomResponse {
+  final int status;
+  final String message;
+  final List<candidateClassroomData> data;
+
+  CandidateClassroomResponse({
+    required this.status,
+    required this.message,
+    required this.data,
+  });
+
+  factory CandidateClassroomResponse.fromJson(Map<String, dynamic> json) {
+    return CandidateClassroomResponse(
+      status: json['status'],
+      message: json['message'],
+      data: (json['data'] as List)
+          .map((e) => candidateClassroomData.fromJson(e))
+          .toList(),
+    );
+  }
+}
+
+
+class candidateClassroomData{
+  final int id;
+  final String first_name;
+  final String last_name;
+  final String email;
+  final bool is_joined;
+
+  candidateClassroomData({
+    required this.id,
+    required this.first_name,
+    required this.last_name,
+    required this.email,
+    required this.is_joined
+  });
+
+  factory candidateClassroomData.fromJson(Map<String,dynamic> json){
+    return candidateClassroomData(
+      id:json['id'],
+      first_name: json['first_name'],
+      last_name: json['last_name'],
+      email: json['email'],
+      is_joined: json['is_joined']
+    );
+  }
+}
+
+class addCandidateRequest {
+  final List<int> students;
+
+  addCandidateRequest({
+    required this.students
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'students': students,
+    };
+  }
+
+  // Optional: Add a factory constructor for creating from JSON
+  factory addCandidateRequest.fromJson(Map<String, dynamic> json) {
+    return addCandidateRequest(
+      students: List<int>.from(json['students'] ?? []),
+    );
+  }
+}
