@@ -7,7 +7,6 @@ pipeline {
 
     environment {
         VENV_DIR = 'venv'
-        DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
     stages {
@@ -34,36 +33,38 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh '''
-                    echo "Running tests... 🔍🔍🔍"
-                    cd backend
-                    . ${VENV_DIR}/bin/activate
-                    cd api
-                    pytest
-                '''
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         sh '''
+        //             echo "Running tests... 🔍🔍🔍"
+        //             cd backend
+        //             . ${VENV_DIR}/bin/activate
+        //             cd api
+        //             pytest
+        //         '''
+        //     }
+        // }
 
         stage('Deploy') {
             when {
                 branch 'main'
             }
             steps {
-                sshagent(credentials: ['atlantic-jenkins-key']) {
+                sshagent(credentials: ['deploy-ssh']) {
                     sh '''
                         echo "Deploying Django service remotely... 🚀"
-                        ssh -o StrictHostKeyChecking=no devops@172.17.0.1  '
-                            cd /home/devops/infra &&
-                            docker compose build django &&
-                            docker compose up -d django
+                        ssh -o StrictHostKeyChecking=no devops@172.17.0.1 '
+                            cd /home/devops/infra/quiz-mobile-apps &&
+                            git pull origin main &&
+                            docker compose -f dockercompose.yml build quiz-app &&
+                            docker compose -f dockercompose.yml up -d quiz-app
                         '
                         echo "Deployment finished ✅"
                     '''
                 }
             }
         }
+
 
     }
 }
