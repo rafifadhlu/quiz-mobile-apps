@@ -7,7 +7,7 @@ pipeline {
     }
 
     stages{
-        stage{'Checkout'}{
+        stage('Checkout'){
             steps{
                 script{
                     // Clean workspace and do fresh checkout
