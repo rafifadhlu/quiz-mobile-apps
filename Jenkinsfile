@@ -45,7 +45,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Deploy') {
             when {
                 branch 'main'
@@ -54,7 +54,7 @@ pipeline {
                 sshagent(credentials: ['atlantic-jenkins-key']) {
                     sh '''
                         echo "Deploying Django service remotely... 🚀"
-                        ssh -o StrictHostKeyChecking=no -p 22 devops@localhost '
+                        ssh -o StrictHostKeyChecking=no devops@172.17.0.1  '
                             cd /home/devops/infra &&
                             docker compose build django &&
                             docker compose up -d django
