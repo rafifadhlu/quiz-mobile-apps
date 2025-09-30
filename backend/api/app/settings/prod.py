@@ -40,6 +40,9 @@ SESSION_COOKIE_SAMESITE = 'Lax'  # Add this too
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
+CORS_ALLOW_ALL_ORIGINS = True  # Temporary for testing
+CORS_ALLOW_CREDENTIALS = True
+
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
