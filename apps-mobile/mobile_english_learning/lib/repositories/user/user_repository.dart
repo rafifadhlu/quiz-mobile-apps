@@ -5,8 +5,9 @@ import 'package:mobile_english_learning/models/user_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRepository {
-  // static const String baseUrl = '10.0.2.2:8000';
-  static const String baseUrl = '192.168.1.9:8000';
+  // static const String baseUrl = '10.0.2.2:8000'; //emulator
+  // static const String baseUrl = '192.168.1.9:8000'; //wifi
+  static const String baseUrl = '203.83.46.48:40700'; //public
 
   Future<LoginResponse> login(LoginRequest request) async{
     await Future.delayed(Duration(seconds:2));
