@@ -7,7 +7,17 @@ pipeline {
     }
 
     stages {
-        
+        stage('Checkout') {
+            steps {
+                script {
+                    // Clean workspace and do fresh checkout
+                    cleanWs()
+                    checkout scm
+                }
+            }
+        }
+
+    stages {   
         stage('Setup') {
             steps {
                 sh '''
