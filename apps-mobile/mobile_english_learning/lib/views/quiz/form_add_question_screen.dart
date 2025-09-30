@@ -195,6 +195,7 @@ Widget build(BuildContext context) {
         icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () {
           context.pop();
+          context.read<QuizViewModels>().getAllQuestionsofQuiz(int.parse(widget.classroomID), int.parse(widget.quizID));
         },
       ),
     ),

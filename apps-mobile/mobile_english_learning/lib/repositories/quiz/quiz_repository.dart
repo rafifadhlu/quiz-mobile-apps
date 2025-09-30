@@ -11,8 +11,8 @@ import 'package:mobile_english_learning/models/quiz_model.dart';
 
 class QuizRepository {
   // static const String baseUrl = '10.0.2.2:8000'; //emulator
-  // static const String baseUrl = '192.168.1.9:8000'; //wifi
-  static const String baseUrl = '203.83.46.48:40700'; //public
+  static const String baseUrl = '192.168.1.9:8000'; //wifi
+  // static const String baseUrl = '203.83.46.48:40700'; //public
 
   Future<Quizesdata> CreateNewQuiz(quizzezRequest request,int classroomID) async{
     final url = Uri.http(baseUrl, 'api/v1/classrooms/${classroomID}/quizzes/');
@@ -147,11 +147,13 @@ class QuizRepository {
       });
 
       if (response.statusCode == 200) {
+        debugPrint("Raw response: ${response.body}");
         final body = jsonDecode(response.body);
-        debugPrint(body.toString());
         return getQuestionsResponse.fromJson(body);
-      } else if (response.statusCode == 401) {
+      }
+        else if (response.statusCode == 401) {
         // token expired → try refresh
+        debugPrint('got 401');
         final newToken = await UserRepository().getNewAccessToken();
         if (newToken != null) {
           // retry the original request

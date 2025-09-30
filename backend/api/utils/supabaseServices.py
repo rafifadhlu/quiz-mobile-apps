@@ -16,7 +16,7 @@ from urllib.parse import urlparse
     
 
 def connect_supabase():
-    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_ROLE_KEY"))
+    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
     return supabase 
 
 def get_signed_urls(file_names):
