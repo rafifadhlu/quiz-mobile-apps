@@ -6,16 +6,17 @@ pipeline {
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                script {
+    stages{
+        stage{'Checkout'}{
+            steps{
+                script{
                     // Clean workspace and do fresh checkout
                     cleanWs()
                     checkout scm
                 }
             }
         }
+    }
 
     stages {   
         stage('Setup') {
