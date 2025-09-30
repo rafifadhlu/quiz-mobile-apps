@@ -51,13 +51,17 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh '''
-                    echo "Deploying Django service... 🚀"
-                    cd /home/devops/infra
-                    docker compose build django
-                    docker compose up -d django
-                    echo "Deployment finished ✅"
-                '''
+                sshagent(credentials: ['atlantic-jenkins-key']) {
+                    sh '''
+                        echo "Deploying Django service remotely... 🚀"
+                        ssh -o StrictHostKeyChecking=no -p 8444 devops@ip.atlantic-server.com'
+                            cd /home/devops/infra &&
+                            docker compose build django &&
+                            docker compose up -d django
+                        '
+                        echo "Deployment finished ✅"
+                    '''
+                }
             }
         }
     }
