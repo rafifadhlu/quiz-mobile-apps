@@ -50,7 +50,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sshagent(credentials: ['deploy-ssh']) {
+                sshagent(credentials: ['atlantic-jenkins-key']) {
                     sh '''
                         echo "Deploying Django service remotely... 🚀"
                         ssh -o StrictHostKeyChecking=no devops@172.17.0.1 '
