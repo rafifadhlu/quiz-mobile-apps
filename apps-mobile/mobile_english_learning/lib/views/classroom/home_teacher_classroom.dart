@@ -117,6 +117,8 @@ class _ClassroomHomeTeacherState extends State<ClassroomHomeTeacher> {
   void _toggleCreate(CreateClassroomRequest request)async{
     final classroomViewsModels = context.read<ClassroomViewsModels>();
     await classroomViewsModels.createClassroom(request);
+
+    await classroomViewsModels.getAllclassrooms();
   }
 
   void _toggleDelete(int userID)async{
@@ -134,56 +136,38 @@ void _togleShowDelete(){
 }
 
   @override
-  Widget build(BuildContext context) {
-    final classroomViewModel = context.watch<ClassroomViewsModels>();
-    final classes = classroomViewModel.classes;
-    
-    if (classes == null){
-      return Scaffold(
-      appBar: AppBar(
-        title: Text("classrooms"),
-        leading: IconButton(onPressed: (){
+    Widget build(BuildContext context) {
+  final classroomViewModel = context.watch<ClassroomViewsModels>();
+  final classes = classroomViewModel.classes;
+  
+  return Scaffold(
+    appBar: AppBar(
+      title: Text("classrooms"),
+      leading: IconButton(
+        onPressed: () {
           context.pop();
-        }, icon: Icon(Icons.arrow_back)),
+        },
+        icon: Icon(Icons.arrow_back),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children:[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ],
-              ),
-               Column(
-                  children: [
-                  ],
-                ),
-            ]
-          )
-          ),
-        )
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("classrooms"),
-        leading: IconButton(
-          onPressed: () {
-            context.pop();
-          },
-          icon: Icon(Icons.arrow_back),
-        ),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // 🔹 Scrollable content
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(height: 60), // leave space for buttons
+    ),
+    body: SafeArea(
+      child: Stack(
+        children: [
+          // 🔹 Scrollable content
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 70), // space for buttons
+                
+                // Show loading or list based on classes state
+                if (classes == null)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text('Lets Create your first classroom!', style: TextStyle(fontSize: 16.0, color: Theme.of(context).primaryColor),
+                    ),
+                  ))
+                else
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -248,15 +232,19 @@ void _togleShowDelete(){
                       );
                     },
                   ),
-                  Text("this is the end"),
-                ],
-              ),
+                
+                if (classes != null) Text("this is the end"),
+              ],
             ),
+          ),
 
-            // 🔹 Fixed-position buttons
-            Positioned(
-              top: 10,
-              right: 10,
+          // 🔹 Fixed-position buttons - ALWAYS VISIBLE
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.all(10),
               child: Row(
                 children: [
                   FloatingActionButton.small(
@@ -273,10 +261,10 @@ void _togleShowDelete(){
                 ],
               ),
             ),
-      ],
+          ),
+        ],
+      ),
     ),
-  ),
-);
-
-  }
+  );
+}
 }

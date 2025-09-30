@@ -3,7 +3,7 @@ import os
 from storages.backends.s3boto3 import S3Boto3Storage
 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+SUPABASE_KEY = os.getenv('SUPABASE_PUBLIC_KEY')
 SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET')
 
 DEBUG = os.getenv("DEBUG", "False") == "True"

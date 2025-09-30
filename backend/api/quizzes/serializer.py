@@ -35,7 +35,8 @@ class QuestionsSerializer(serializers.ModelSerializer):
 
     # for get request
     def get_question_image_url(self, obj):
-        signed_map = self.context.get('signed_url_map', {})
+        context = self.context or {}
+        signed_map = context.get('signed_url_map', {})
         return signed_map.get(obj.question_image.name) if obj.question_image else None
 
     def get_question_audio_url(self, obj):
