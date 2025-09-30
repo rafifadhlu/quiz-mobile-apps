@@ -1,12 +1,24 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout()
+    }
+
     environment {
         VENV_DIR = 'venv'
         DOCKER_COMPOSE_FILE = '/home/devops/infra/compose.yml'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    cleanWs()
+                    checkout scm
+                }
+            }
+        }
         
         stage('Setup') {
             steps {
@@ -36,7 +48,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                branch 'main'   // only deploy if merge goes to main
+                branch 'main'
             }
             steps {
                 sh '''
