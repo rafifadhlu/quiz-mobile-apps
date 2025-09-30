@@ -22,6 +22,12 @@ CSRF_TRUSTED_ORIGINS = [
     "https://roughly-up-skink.ngrok-free.app",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Your React dev server
+    "http://localhost:3000",  # Alternative React port
+    "http://203.83.46.48:40700",  # Your production frontend (if any)
+]
+
 # Add these CSRF settings
 CSRF_COOKIE_DOMAIN = None
 CSRF_COOKIE_SAMESITE = 'Lax'  # Add this
