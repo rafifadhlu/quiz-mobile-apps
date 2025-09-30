@@ -56,8 +56,8 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no devops@172.17.0.1 '
                             cd /home/devops/infra/quiz-mobile-apps &&
                             git pull origin main &&
-                            docker compose -f dockercompose.yml build quiz-app &&
-                            docker compose -f dockercompose.yml up -d quiz-app
+                            docker compose -f docker-compose.yml build quiz-app &&
+                            docker compose -f docker-compose.yml up -d quiz-app
                         '
                         echo "Deployment finished ✅"
                     '''
