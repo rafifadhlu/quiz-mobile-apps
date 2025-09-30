@@ -7,12 +7,33 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET')
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = ['roughly-up-skink.ngrok-free.app','localhost','127.0.0.1']
 
+
+ALLOWED_HOSTS = [
+    'roughly-up-skink.ngrok-free.app',
+    '203.83.46.48',
+    'localhost',
+    '127.0.0.1',
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://203.83.46.48:40700/ep/"
+    "http://203.83.46.48:40700",  # This is correct
+    "http://203.83.46.48",         # Add this too
+    "https://roughly-up-skink.ngrok-free.app",
 ]
+
+# Add these CSRF settings
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_SAMESITE = 'Lax'  # Add this
+CSRF_USE_SESSIONS = False      # Add this
+
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_SAMESITE = 'Lax'  # Add this too
+
+# Since you're using HTTP (not HTTPS), these should be False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
@@ -24,6 +45,9 @@ DATABASES = {
         'PASSWORD': os.getenv("DB_PASSWORD"),
         'HOST': os.getenv("DB_HOST"),
         'PORT': os.getenv("DB_PORT"),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
@@ -72,6 +96,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Still needed for collectstatic process
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 X_FRAME_OPTIONS = 'DENY'

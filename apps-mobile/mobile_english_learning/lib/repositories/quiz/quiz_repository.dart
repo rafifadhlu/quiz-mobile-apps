@@ -10,8 +10,9 @@ import 'package:mobile_english_learning/models/quiz_model.dart';
 
 
 class QuizRepository {
-  // static const String baseUrl = '10.0.2.2:8000';
-  static const String baseUrl = '192.168.1.9:8000';
+  // static const String baseUrl = '10.0.2.2:8000'; //emulator
+  // static const String baseUrl = '192.168.1.9:8000'; //wifi
+  static const String baseUrl = '203.83.46.48:40700'; //public
 
   Future<Quizesdata> CreateNewQuiz(quizzezRequest request,int classroomID) async{
     final url = Uri.http(baseUrl, 'api/v1/classrooms/${classroomID}/quizzes/');
@@ -99,6 +100,9 @@ class QuizRepository {
               'Authorization': 'Bearer $_token',
         });
 
+      debugPrint("Raw response body: ${response.body}");
+
+
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         debugPrint("Status code : ${response.body}");
@@ -124,6 +128,9 @@ class QuizRepository {
         }
         throw Exception('Unauthorized: Token expired and refresh failed');
       } else {
+        final body = jsonDecode(response.body);
+        debugPrint("Status code : ${response.body}");
+        debugPrint("Status code : ${getQuizzesResponse.fromJson(body)}");
         throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
       }
   }
