@@ -54,7 +54,7 @@ pipeline {
                 sshagent(credentials: ['atlantic-jenkins-key']) {
                     sh '''
                         echo "Deploying Django service remotely... 🚀"
-                        ssh -o StrictHostKeyChecking=no -p 8444 devops@ip.atlantic-server.com '
+                        ssh -o StrictHostKeyChecking=no -p 22 devops@localhost '
                             cd /home/devops/infra &&
                             docker compose build django &&
                             docker compose up -d django
