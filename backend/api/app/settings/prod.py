@@ -19,6 +19,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://203.83.46.48:40700",  # This is correct
     "http://203.83.46.48",         # Add this too
+    "http://localhost:5173",
     "https://roughly-up-skink.ngrok-free.app",
 ]
 
