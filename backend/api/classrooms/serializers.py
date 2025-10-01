@@ -7,12 +7,16 @@ class UserClassroomSerializer(serializers.ModelSerializer):
     Serializer for listing users in a classroom.
     """
     class_name = serializers.CharField(max_length=20)
-    teacher = serializers.CharField(read_only=True);
+    teacher =  serializers.SerializerMethodField()
 
     class Meta:
         model = classroom
         fields = ['id', 'class_name', 'teacher']
         read_only_fields = ['teacher']
+    
+    def get_teacher(self, obj):
+        """Return teacher's full name"""
+        return f"{obj.teacher.first_name} {obj.teacher.last_name}"
 
 class UserAddClassroomMemberSerializer(serializers.Serializer):
     """

@@ -243,7 +243,6 @@ void _togleShowDelete(){
             top: 0,
             right: 0,
             child: Container(
-              color: Colors.white,
               padding: EdgeInsets.all(10),
               child: Row(
                 children: [
