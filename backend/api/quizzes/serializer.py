@@ -71,7 +71,7 @@ class QuestionsSerializer(serializers.ModelSerializer):
         choices_data = validated_data.pop("choices", None)
         if choices_data is not None:
             existing_ids = [c.id for c in instance.choices_set.all()]
-            sent_ids = [c.get("id") for c in choices_data if "id" in c]
+            sent_ids = [c.get("id") for c in choices_data if c.get("id") is not None]
 
             # Delete removed choices
             for choice_id in existing_ids:
@@ -80,16 +80,23 @@ class QuestionsSerializer(serializers.ModelSerializer):
 
             # Update or create
             for c_item in choices_data:
-                if "id" in c_item:
-                    choice_instance = instance.choices_set.get(id=c_item["id"])
-                    choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
-                    choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
-                    choice_instance.save()
-                else:
+                choice_id = c_item.get("id", None)
+
+                if choice_id is not None:  # update existing
+                    try:
+                        choice_instance = instance.choices_set.get(id=choice_id)
+                        choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
+                        choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
+                        choice_instance.save()
+                    except choices.DoesNotExist:
+                        # fallback: create if ID not found
+                        choices.objects.create(question=instance, **c_item)
+                else:  # new choice
                     choices.objects.create(question=instance, **c_item)
 
         instance.save()
         return instance
+
  
         
     
