@@ -29,7 +29,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Your React dev server
     "http://localhost:3000",  # Alternative React port
     "http://203.83.46.48:40700",  # Your production frontend (if any)
-    "https://simple-registration-page-ten.vercel.app/"
 ]
 
 # Add these CSRF settings
