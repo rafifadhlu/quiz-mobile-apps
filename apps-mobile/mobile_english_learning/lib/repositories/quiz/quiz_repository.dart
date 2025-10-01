@@ -140,6 +140,9 @@ class QuizRepository {
       final _token = await SharedPrefUtils.readPrefStr('access_token');
 
       debugPrint("Hit url.........");
+
+      debugPrint("classroomID : ${classroomId} , quizID : ${quizID} ");
+
       final response = await http.get(url,
       headers: {
               'Content-Type': 'application/json',
