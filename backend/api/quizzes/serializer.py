@@ -86,17 +86,20 @@ class QuestionsSerializer(serializers.ModelSerializer):
                         choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
                         choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
                         choice_instance.save()
-                    except choices.DoesNotExist:  # ✅ use the model class
-                        c_item.pop("id", None)
-                        choices.objects.create(question=instance, **c_item)
-                else:  # new choices
-                    c_item.pop("id", None)
-                    choices.objects.create(question=instance, **c_item)
+                    except instance.choices_set.model.DoesNotExist:  # ✅ Better exception handling
+                        # If ID doesn't exist, create new
+                        instance.choices_set.create(
+                            choice_text=c_item.get("choice_text"),
+                            is_correct=c_item.get("is_correct", False)
+                        )
+                else:  # new choice
+                    instance.choices_set.create(
+                        choice_text=c_item.get("choice_text"),
+                        is_correct=c_item.get("is_correct", False)
+                    )
 
         instance.save()
         return instance
-
-
 
  
         
