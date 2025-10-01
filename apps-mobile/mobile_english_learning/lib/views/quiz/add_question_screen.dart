@@ -312,7 +312,6 @@ Widget build(BuildContext context) {
         top: 0,
         right: 0,
         child: Container(
-          color: Colors.white,
           padding: EdgeInsets.all(8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
