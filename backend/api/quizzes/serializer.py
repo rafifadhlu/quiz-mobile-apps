@@ -62,12 +62,10 @@ class QuestionsSerializer(serializers.ModelSerializer):
         return value
     
     def update(self, instance, validated_data):
-        # Update question fields
         instance.question_text = validated_data.get("question_text", instance.question_text)
         instance.question_image = validated_data.get("question_image", instance.question_image)
         instance.question_audio = validated_data.get("question_audio", instance.question_audio)
 
-        # Handle choices
         choices_data = validated_data.pop("choices", None)
         if choices_data is not None:
             existing_ids = [c.id for c in instance.choices_set.all()]
@@ -88,13 +86,12 @@ class QuestionsSerializer(serializers.ModelSerializer):
                         choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
                         choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
                         choice_instance.save()
-                    except choice_instance.DoesNotExist:
-                        # fallback: create new if ID doesn't exist
+                    except choices.DoesNotExist:  # ✅ use the model class
                         c_item.pop("id", None)
-                        choice_instance.objects.create(question=instance, **c_item)
-                else:  # new choice
-                    c_item.pop("id", None)  # ✅ make sure "id" isn't passed
-                    choice_instance.objects.create(question=instance, **c_item)
+                        choices.objects.create(question=instance, **c_item)
+                else:  # new choices
+                    c_item.pop("id", None)
+                    choices.objects.create(question=instance, **c_item)
 
         instance.save()
         return instance
