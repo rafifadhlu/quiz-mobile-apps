@@ -98,6 +98,8 @@ STORAGES = {
     },
 }
 
+MEDIA_ROOT = BASE_DIR / 'media' 
+
 # Keep these URL settings:
 STATIC_URL = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{os.getenv('SUPABASE_STATIC_BUCKET')}/"
 MEDIA_URL = f"{os.getenv('SUPABASE_URL')}/storage/v1/object/public/{os.getenv('SUPABASE_MEDIA_BUCKET')}/"
