@@ -33,6 +33,20 @@ class QuestionsSerializer(serializers.ModelSerializer):
         model = questions
         fields = ["id","quiz_id","question_text","question_audio","question_image","question_audio_url","question_image_url", "choices", "choices_list"]
 
+    def to_internal_value(self, data):
+        import json
+        
+        # If choices comes as a JSON string (from multipart), parse it
+        if 'choices' in data and isinstance(data.get('choices'), str):
+            try:
+                data = data.copy()  # Make mutable copy
+                data['choices'] = json.loads(data['choices'])
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({'choices': f'Invalid JSON: {str(e)}'})
+        
+        return super().to_internal_value(data)
+
+
     # for get request
     def get_question_image_url(self, obj):
         context = self.context or {}
@@ -62,43 +76,69 @@ class QuestionsSerializer(serializers.ModelSerializer):
         return value
     
     def update(self, instance, validated_data):
+        # ✅ ADD DEBUG (remove after testing)
+        print(f"========== UPDATE METHOD ==========")
+        print(f"validated_data keys: {validated_data.keys()}")
+        
         instance.question_text = validated_data.get("question_text", instance.question_text)
         instance.question_image = validated_data.get("question_image", instance.question_image)
         instance.question_audio = validated_data.get("question_audio", instance.question_audio)
 
         choices_data = validated_data.pop("choices", None)
+        
+        # ✅ ADD DEBUG
+        print(f"choices_data: {choices_data}")
+        print(f"Number of choices: {len(choices_data) if choices_data else 0}")
+        
         if choices_data is not None:
             existing_ids = [c.id for c in instance.choices_set.all()]
             sent_ids = [c.get("id") for c in choices_data if c.get("id") is not None]
 
+            print(f"Existing IDs in DB: {existing_ids}")
+            print(f"Sent IDs from client: {sent_ids}")
+
             # Delete removed choices
             for choice_id in existing_ids:
                 if choice_id not in sent_ids:
+                    print(f"Deleting choice {choice_id}")
                     instance.choices_set.filter(id=choice_id).delete()
 
             # Update or create
             for c_item in choices_data:
                 choice_id = c_item.get("id", None)
+                choice_text = c_item.get("choice_text")
+                is_correct = c_item.get("is_correct")
+                
+                print(f"Processing: id={choice_id}, text='{choice_text}', correct={is_correct}")
 
                 if choice_id is not None:  # update existing
                     try:
                         choice_instance = instance.choices_set.get(id=choice_id)
-                        choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
-                        choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
+                        choice_instance.choice_text = choice_text
+                        choice_instance.is_correct = is_correct
                         choice_instance.save()
-                    except instance.choices_set.model.DoesNotExist:  # ✅ Better exception handling
-                        # If ID doesn't exist, create new
-                        instance.choices_set.create(
-                            choice_text=c_item.get("choice_text"),
-                            is_correct=c_item.get("is_correct", False)
+                        print(f"  ✅ Updated choice {choice_id}")
+                    except instance.choices_set.model.DoesNotExist:
+                        new_choice = instance.choices_set.create(
+                            choice_text=choice_text,
+                            is_correct=is_correct if is_correct is not None else False
                         )
+                        print(f"  ✅ Created choice {new_choice.id} (ID didn't exist)")
                 else:  # new choice
-                    instance.choices_set.create(
-                        choice_text=c_item.get("choice_text"),
-                        is_correct=c_item.get("is_correct", False)
+                    new_choice = instance.choices_set.create(
+                        choice_text=choice_text,
+                        is_correct=is_correct if is_correct is not None else False
                     )
+                    print(f"  ✅ Created NEW choice {new_choice.id}")
 
         instance.save()
+        
+        # ✅ FINAL DEBUG
+        print(f"Final choices in DB:")
+        for choice in instance.choices_set.all():
+            print(f"  ID:{choice.id} | Text:'{choice.choice_text}' | Correct:{choice.is_correct}")
+        print(f"===================================")
+        
         return instance
 
  
