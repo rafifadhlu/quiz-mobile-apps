@@ -35,16 +35,36 @@ class QuestionsSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         import json
+        from collections import OrderedDict
         
-        # If choices comes as a JSON string (from multipart), parse it
+        print(f"========== to_internal_value ==========")
+        print(f"Raw data type: {type(data)}")
+        
+        # ✅ Convert QueryDict to regular dict FIRST
+        if hasattr(data, 'dict'):
+            data = data.dict()  # Convert QueryDict to dict
+            print(f"Converted to dict")
+        
+        # If choices comes as a JSON string, parse it
         if 'choices' in data and isinstance(data.get('choices'), str):
             try:
-                data = data.copy()  # Make mutable copy
                 data['choices'] = json.loads(data['choices'])
+                print(f"✅ Parsed choices: {data['choices']}")
             except json.JSONDecodeError as e:
                 raise serializers.ValidationError({'choices': f'Invalid JSON: {str(e)}'})
         
-        return super().to_internal_value(data)
+        print(f"Data before super(): {data.keys()}")
+        result = super().to_internal_value(data)
+        print(f"After super().to_internal_value, keys: {result.keys()}")
+        print(f"======================================")
+        return result
+    
+    def validate_choices(self, value):
+        print(f"========== validate_choices called ==========")
+        print(f"Choices value: {value}")
+        print(f"Choices type: {type(value)}")
+        print("=============================================")
+        return value
 
 
     # for get request
