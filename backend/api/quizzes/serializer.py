@@ -88,14 +88,15 @@ class QuestionsSerializer(serializers.ModelSerializer):
                         choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
                         choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
                         choice_instance.save()
-                    except choices.DoesNotExist:
+                    except Choice.DoesNotExist:  # ✅ correct model name
                         # fallback: create if ID not found
-                        choices.objects.create(question=instance, **c_item)
+                        Choice.objects.create(question=instance, **c_item)
                 else:  # new choice
-                    choices.objects.create(question=instance, **c_item)
+                    Choice.objects.create(question=instance, **c_item)
 
         instance.save()
         return instance
+
 
  
         
