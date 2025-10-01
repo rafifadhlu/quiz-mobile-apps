@@ -205,8 +205,17 @@ class UserQuestionsSerializer(serializers.Serializer):
         quiz_instance = quizzes.objects.get(id=quiz_id)
         request = self.context.get("request")
 
-        image_from_field = validated_data.pop("images_files",[])
-        audio_from_field = validated_data.pop("audio_files",[])
+        # Instead of compacted list, read raw files with their indices
+        image_files = {}
+        audio_files = {}
+
+        for key, file in request.FILES.items():
+            if key.startswith("images_files["):
+                index = int(key[len("images_files["):-1])  # extract index from "images_files[3]"
+                image_files[index] = file
+            elif key.startswith("audio_files["):
+                index = int(key[len("audio_files["):-1])
+                audio_files[index] = file
 
         created_questions = []
         questions_data = validated_data["questions"]
@@ -214,12 +223,12 @@ class UserQuestionsSerializer(serializers.Serializer):
         for index, q_item in enumerate(questions_data):
             choices_data = q_item.pop("choices", [])
 
-            if index < len(image_from_field) and image_from_field[index]:
-                q_item["question_image"] = image_from_field[index]
+            if index in image_files:
+                q_item["question_image"] = image_files[index]
 
-            if index < len(audio_from_field) and audio_from_field[index]:
-                q_item["question_audio"] = audio_from_field[index] 
-            
+            if index in audio_files:
+                q_item["question_audio"] = audio_files[index]
+
             question_instance = questions.objects.create(
                 quiz=quiz_instance, **q_item
             )
@@ -230,6 +239,7 @@ class UserQuestionsSerializer(serializers.Serializer):
             created_questions.append(question_instance)
 
         return created_questions
+
     
 
 class UserSubmitAnswerSerializer(serializers.ModelSerializer):

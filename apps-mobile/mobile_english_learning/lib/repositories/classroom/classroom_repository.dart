@@ -10,8 +10,8 @@ import 'package:mobile_english_learning/utils/shared_prefs.dart';
 
 class ClassroomRepository {
   // static const String baseUrl = '10.0.2.2:8000'; //emulator
-  // static const String baseUrl = '192.168.1.9:8000'; //wifi
-  static const String baseUrl = '203.83.46.48:40700'; //public
+  static const String baseUrl = '192.168.1.9:8000'; //wifi
+  // static const String baseUrl = '203.83.46.48:40700'; //public
 
   Future<ClassroomData> createClassroom(CreateClassroomRequest request)async{
     await Future.delayed(Duration(seconds:2));
