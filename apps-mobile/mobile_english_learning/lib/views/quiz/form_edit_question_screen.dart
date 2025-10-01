@@ -115,8 +115,9 @@ class _FormEditQuestionScreenState extends State<FormEditQuestionScreen> {
         question_image: null,
         question_audio: null,
         choices: List.generate(_ChoicesTextcontrollers.length, (index) {
+          final existingId = index < existingChoices.length ? existingChoices[index].id : null;
           return choiceDataRequest(
-            id: index < existingChoices.length ? existingChoices[index].id : null,
+            id: existingId, // ✅ keep stable ID if still in same slot
             choice_text: _ChoicesTextcontrollers[index].text,
             is_correct: _ChoicesCorrectscontrollers[index],
           );

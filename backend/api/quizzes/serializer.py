@@ -81,15 +81,17 @@ class QuestionsSerializer(serializers.ModelSerializer):
             # Update or create
             for c_item in choices_data:
                 choice_id = c_item.get("id", None)
-                if choice_id:
+
+                if choice_id is not None:  # update existing
                     try:
                         choice_instance = instance.choices_set.get(id=choice_id)
                         choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
                         choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
                         choice_instance.save()
                     except choices.DoesNotExist:
+                        # fallback: create if ID not found
                         choices.objects.create(question=instance, **c_item)
-                else:
+                else:  # new choice
                     choices.objects.create(question=instance, **c_item)
 
         instance.save()
