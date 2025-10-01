@@ -405,48 +405,59 @@ class QuizRepository {
   }
 
   Future<QuestionData?> updateQuestion({
-    required int classroomId,
-    required int quizId,
-    required int questionId,
-    required QuestionData question,
-    File? imageFile,
-    File? audioFile,
-  }) async {
-    var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizId/questions/$questionId');
-    final _token = await SharedPrefUtils.readPrefStr('access_token');
+      required int classroomId,
+      required int quizId,
+      required int questionId,
+      required QuestionData question,
+      File? imageFile,
+      File? audioFile,
+    }) async {
+      var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizId/questions/$questionId');
+      final _token = await SharedPrefUtils.readPrefStr('access_token');
 
-    try {
-      // ✅ Prepare multipart request for image/audio
-      var request = http.MultipartRequest('PUT', url);
+      debugPrint('Updating question at: $url');
+      debugPrint('Has image: ${imageFile != null}');
+      debugPrint('Has audio: ${audioFile != null}');
 
-      request.headers.addAll({
-        'Authorization': 'Bearer $_token'
-      });
+      try {
+        var request = http.MultipartRequest('PUT', url);
 
-      request.fields['question_text'] = question.question_text;
-      request.fields['choices'] = jsonEncode(question.choices.map((c) => c.toJson()).toList());
+        request.headers.addAll({
+          'Authorization': 'Bearer $_token'
+        });
 
-      if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('question_image', imageFile.path));
+        request.fields['question_text'] = question.question_text;
+        request.fields['choices'] = jsonEncode(question.choices.map((c) => c.toJson()).toList());
+
+        if (imageFile != null) {
+          request.files.add(await http.MultipartFile.fromPath('question_image', imageFile.path));
+        }
+
+        if (audioFile != null) {
+          request.files.add(await http.MultipartFile.fromPath('question_audio', audioFile.path));
+        }
+
+        debugPrint('Sending request...');
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+
+        debugPrint('JSON being sent: ${request.fields['choices']}');
+        debugPrint('Response status: ${response.statusCode}');
+        debugPrint('Response body: $responseBody');
+        debugPrint('Response reason: ${response.reasonPhrase}');
+
+        if (response.statusCode == 200) {
+          final jsonData = jsonDecode(responseBody);
+          return QuestionData.fromJson(jsonData['data']);
+        } else {
+          debugPrint('ERROR: Failed with status ${response.statusCode}');
+          throw Exception('Failed to update question: ${response.statusCode} - $responseBody');
+        }
+      } catch (e) {
+        debugPrint('CAUGHT ERROR: $e');
+        rethrow; // Don't swallow the error
       }
-
-      if (audioFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('question_audio', audioFile.path));
-      }
-
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(responseBody);
-        return QuestionData.fromJson(jsonData['data']);
-      } else {
-        throw Exception('Failed to update question: ${response.statusCode} ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      throw Exception("Error updating question: $e");
     }
-  }
 
   
 

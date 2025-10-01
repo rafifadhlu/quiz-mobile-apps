@@ -105,34 +105,38 @@ class _FormEditQuestionScreenState extends State<FormEditQuestionScreen> {
   }
 
   void _submitChanges() async {
-    final quizViewModels = context.read<QuizViewModels>();
+      debugPrint('=== Submit button pressed ===');
+  
+      final quizViewModels = context.read<QuizViewModels>();
+      final existingChoices = quizViewModels.singleQuestion?.choices ?? [];
 
-    // get existing data from controllers
-    final updatedQuestion = QuestionData(
-      question_text: _Questionscontrollers.text,
-      question_image: _pickedImages != null ? _pickedImages!.path : null,
-      question_audio: _pickedAudios != null ? _pickedAudios!.path : null,
-      choices: List.generate(_ChoicesTextcontrollers.length, (index) {
-        return choiceDataRequest(
-          choice_text: _ChoicesTextcontrollers[index].text,
-          is_correct: _ChoicesCorrectscontrollers[index],
-        );
-      }),
-    );
+      final updatedQuestion = QuestionData(
+        question_text: _Questionscontrollers.text,
+        question_image: null,
+        question_audio: null,
+        choices: List.generate(_ChoicesTextcontrollers.length, (index) {
+          return choiceDataRequest(
+            id: index < existingChoices.length ? existingChoices[index].id : null,
+            choice_text: _ChoicesTextcontrollers[index].text,
+            is_correct: _ChoicesCorrectscontrollers[index],
+          );
+        }),
+      );
 
+        // DEBUG: Print what we're sending
+        debugPrint('Sending choices:');
+        for (var choice in updatedQuestion.choices) {
+          debugPrint('  ID: ${choice.id}, Text: "${choice.choice_text}", Correct: ${choice.is_correct}');
+        }
 
-    await quizViewModels.updateQuestion(
-      int.parse(widget.classroomID),
-      int.parse(widget.quizID),
-      int.parse(widget.questionID),
-      updatedQuestion,
-      imageFile: _pickedImages,
-      audioFile: _pickedAudios,
-    );
-
-    if(quizViewModels.isLoading == true){
-      CircularProgressIndicator(color: Theme.of(context).primaryColor,);
-    }
+      await quizViewModels.updateQuestion(
+        int.parse(widget.classroomID),
+        int.parse(widget.quizID),
+        int.parse(widget.questionID),
+        updatedQuestion,
+        imageFile: _pickedImages,
+        audioFile: _pickedAudios,
+      );
 
     if (quizViewModels.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +146,8 @@ class _FormEditQuestionScreenState extends State<FormEditQuestionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Question updated successfully!')),
       );
-      context.pop(true); 
+      await Future.delayed(Duration(seconds: 1));
+      if (mounted) context.pop(true);
     }
   }
 
