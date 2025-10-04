@@ -91,8 +91,8 @@ class QuestionsSerializer(serializers.ModelSerializer):
         return value
 
     def validate_question_audio(self, value):
-        if value and value.content_type not in ['audio/mpeg', 'audio/wav']:
-            raise serializers.ValidationError("Only MP3 and WAV audio files are allowed.")
+        if value and value.content_type not in ['audio/mpeg', 'audio/wav', 'audio/mp3','audio/MP3','audio/mpeg']:
+            raise serializers.ValidationError("Only audio files are allowed.")
         return value
     
     def update(self, instance, validated_data):
