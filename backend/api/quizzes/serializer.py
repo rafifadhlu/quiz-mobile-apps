@@ -225,34 +225,43 @@ class UserQuestionsSerializer(serializers.Serializer):
     
     # for incoming files validation
     def validate_images_files(self, value):
-        if not value:
+        if not value:  # no files uploaded
             return None
-        content_type = getattr(value, "content_type", None)
-        if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
-            raise serializers.ValidationError("Only JPG and PNG images are allowed.")
+        
+        # value is a list of files
+        for file in value:
+            if not file:
+                continue
+            content_type = getattr(file, "content_type", None)
+            if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
+                raise serializers.ValidationError(f"Invalid image type: {content_type}. Only JPG and PNG are allowed.")
         return value
 
 
     def validate_audio_files(self, value):
-        if not value:
-            return None  
+            if not value:  # no files uploaded
+                return None  
 
-        content_type = getattr(value, "content_type", None)
-        ext = os.path.splitext(value.name)[1].lower()
+            allowed_types = {
+                "audio/mpeg", "audio/mp3",
+                "audio/wav", "audio/x-wav",
+                "audio/aac", "audio/mp4",
+                "application/octet-stream",  # some clients send this
+            }
+            allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
 
-        allowed_types = {
-            "audio/mpeg", "audio/mp3",
-            "audio/wav", "audio/x-wav",
-            "audio/aac", "audio/mp4",
-            "application/octet-stream",  # some clients send this
-        }
+            # value is a list of files
+            for file in value:
+                if not file:
+                    continue
+                content_type = getattr(file, "content_type", None)
+                ext = os.path.splitext(file.name)[1].lower()
 
-        allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
-
-        if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
-            raise serializers.ValidationError(f"Only audio files are allowed. Got {content_type} / {ext}")
-        
-        return value
+                if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
+                    raise serializers.ValidationError(
+                        f"Invalid audio type: {content_type} / {ext}. Only MP3, WAV, AAC, M4A are allowed."
+                    )
+            return value
 
 
     def create(self, validated_data):
