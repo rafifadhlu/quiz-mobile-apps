@@ -86,13 +86,19 @@ class QuestionsSerializer(serializers.ModelSerializer):
     
     # for incoming files validation
     def validate_question_image(self, value):
-        if value and value.content_type not in ['image/jpeg', 'image/png']:
+        if value and value.content_type not in ['image/jpeg', 'image/png','image/jpg']:
             raise serializers.ValidationError("Only JPG and PNG images are allowed.")
         return value
 
     def validate_question_audio(self, value):
-        if value and value.content_type not in ['audio/mpeg', 'audio/wav']:
-            raise serializers.ValidationError("Only MP3 and WAV audio files are allowed.")
+        if value and value.content_type not in [
+            'audio/mpeg',  # MP3
+            'audio/mp3',
+            'audio/wav',
+            'audio/x-wav',
+            'audio/aac',
+            'audio/mp4', ]:
+            raise serializers.ValidationError("Only audio files are allowed.")
         return value
     
     def update(self, instance, validated_data):
@@ -172,6 +178,7 @@ class UserQuestionsSerializer(serializers.Serializer):
     audio_files = serializers.ListField(
         child=serializers.FileField(), required=False, write_only=True
     )
+    
 
     def validate_questions(self, value):
         if not value:
@@ -199,6 +206,23 @@ class UserQuestionsSerializer(serializers.Serializer):
                 raise serializers.ValidationError(f"Invalid question data: {question_serializer.errors}")
         
         return validated_questions
+    
+    # for incoming files validation
+    def validate_images_files(self, value):
+        if value and value.content_type not in ['image/jpeg', 'image/png','image/jpg']:
+            raise serializers.ValidationError("Only JPG and PNG images are allowed.")
+        return value
+
+    def validate_audio_files(self, value):
+        if value and value.content_type not in [
+            'audio/mpeg',  # MP3
+            'audio/mp3',
+            'audio/wav',
+            'audio/x-wav',
+            'audio/aac',
+            'audio/mp4', ]:
+            raise serializers.ValidationError("Only audio files are allowed.")
+        return value
 
     def create(self, validated_data):
         quiz_id = self.context.get("quiz_id")
