@@ -1,4 +1,5 @@
 from operator import index
+import os
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import quizzes,questions,choices,student_answers,QuizAttempt
@@ -93,27 +94,27 @@ class QuestionsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Only JPG and PNG images are allowed.")
         return value
 
-
     def validate_question_audio(self, value):
-        # If nothing uploaded, just return None safely
         if not value:
             return None  
 
-        # Safely extract content_type
         content_type = getattr(value, "content_type", None)
+        ext = os.path.splitext(value.name)[1].lower()
+
         allowed_types = {
-            "audio/mpeg",   # MP3
-            "audio/mp3",
-            "audio/wav",
-            "audio/x-wav",
-            "audio/aac",
-            "audio/mp4",
+            "audio/mpeg", "audio/mp3",
+            "audio/wav", "audio/x-wav",
+            "audio/aac", "audio/mp4",
+            "application/octet-stream",  # some clients send this
         }
 
-        if not content_type or content_type.lower() not in allowed_types:
-            raise serializers.ValidationError("Only audio files are allowed.")
+        allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
+
+        if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
+            raise serializers.ValidationError(f"Only audio files are allowed. Got {content_type} / {ext}")
         
         return value
+
 
     
     def update(self, instance, validated_data):
@@ -223,7 +224,7 @@ class UserQuestionsSerializer(serializers.Serializer):
         return validated_questions
     
     # for incoming files validation
-    def validate_question_image(self, value):
+    def validate_images_files(self, value):
         if not value:
             return None
         content_type = getattr(value, "content_type", None)
@@ -232,24 +233,24 @@ class UserQuestionsSerializer(serializers.Serializer):
         return value
 
 
-    def validate_question_audio(self, value):
-        # If nothing uploaded, just return None safely
+    def validate_audio_files(self, value):
         if not value:
             return None  
 
-        # Safely extract content_type
         content_type = getattr(value, "content_type", None)
+        ext = os.path.splitext(value.name)[1].lower()
+
         allowed_types = {
-            "audio/mpeg",   # MP3
-            "audio/mp3",
-            "audio/wav",
-            "audio/x-wav",
-            "audio/aac",
-            "audio/mp4",
+            "audio/mpeg", "audio/mp3",
+            "audio/wav", "audio/x-wav",
+            "audio/aac", "audio/mp4",
+            "application/octet-stream",  # some clients send this
         }
 
-        if not content_type or content_type.lower() not in allowed_types:
-            raise serializers.ValidationError("Only audio files are allowed.")
+        allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
+
+        if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
+            raise serializers.ValidationError(f"Only audio files are allowed. Got {content_type} / {ext}")
         
         return value
 
