@@ -86,20 +86,35 @@ class QuestionsSerializer(serializers.ModelSerializer):
     
     # for incoming files validation
     def validate_question_image(self, value):
-        if value and value.content_type not in ['image/jpeg', 'image/png','image/jpg']:
+        if not value:
+            return None
+        content_type = getattr(value, "content_type", None)
+        if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
             raise serializers.ValidationError("Only JPG and PNG images are allowed.")
         return value
 
+
     def validate_question_audio(self, value):
-        if value and value.content_type not in [
-            'audio/mpeg',  # MP3
-            'audio/mp3',
-            'audio/wav',
-            'audio/x-wav',
-            'audio/aac',
-            'audio/mp4', ]:
+        # If nothing uploaded, just return None safely
+        if not value:
+            return None  
+
+        # Safely extract content_type
+        content_type = getattr(value, "content_type", None)
+        allowed_types = {
+            "audio/mpeg",   # MP3
+            "audio/mp3",
+            "audio/wav",
+            "audio/x-wav",
+            "audio/aac",
+            "audio/mp4",
+        }
+
+        if not content_type or content_type.lower() not in allowed_types:
             raise serializers.ValidationError("Only audio files are allowed.")
+        
         return value
+
     
     def update(self, instance, validated_data):
         # ✅ ADD DEBUG (remove after testing)
@@ -208,21 +223,36 @@ class UserQuestionsSerializer(serializers.Serializer):
         return validated_questions
     
     # for incoming files validation
-    def validate_images_files(self, value):
-        if value and value.content_type not in ['image/jpeg', 'image/png','image/jpg']:
+    def validate_question_image(self, value):
+        if not value:
+            return None
+        content_type = getattr(value, "content_type", None)
+        if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
             raise serializers.ValidationError("Only JPG and PNG images are allowed.")
         return value
 
-    def validate_audio_files(self, value):
-        if value and value.content_type not in [
-            'audio/mpeg',  # MP3
-            'audio/mp3',
-            'audio/wav',
-            'audio/x-wav',
-            'audio/aac',
-            'audio/mp4', ]:
+
+    def validate_question_audio(self, value):
+        # If nothing uploaded, just return None safely
+        if not value:
+            return None  
+
+        # Safely extract content_type
+        content_type = getattr(value, "content_type", None)
+        allowed_types = {
+            "audio/mpeg",   # MP3
+            "audio/mp3",
+            "audio/wav",
+            "audio/x-wav",
+            "audio/aac",
+            "audio/mp4",
+        }
+
+        if not content_type or content_type.lower() not in allowed_types:
             raise serializers.ValidationError("Only audio files are allowed.")
+        
         return value
+
 
     def create(self, validated_data):
         quiz_id = self.context.get("quiz_id")
