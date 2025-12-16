@@ -46,17 +46,12 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                 flex:1,
                   child: Column(
                     children: [
-                      Image(
-                        image: AssetImage('assets/icons/brain.png'),
-                        // fit: BoxFit.cover,
-                        width: 40.0,
-                        height: 40.0),
-                      Text("Brain Boost"
+                      Text("Kuizu!"
                         ,style: TextStyle(
                           fontSize: 8.0,
                           fontFamily: Theme.of(context).textTheme.bodySmall?.fontFamily,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor
+                          color: Color.fromRGBO(236, 127, 25, 1)
                         ),),
 
                     ],
@@ -104,7 +99,7 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                               child: Center(
                                 child: Column(
                                   children:<Widget> [
-                                    CircularProgressIndicator(color: Theme.of(context).primaryColor,),
+                                    CircularProgressIndicator(color: Color.fromRGBO(236, 127, 25, 1),),
                                     Text("Loading User Data")
                                   ],
                                 ),
@@ -139,7 +134,7 @@ class _UserAuthHomeScreen extends State<UserAuthHomeScreen>{
                                                             style: TextStyle(
                                                               fontSize: 14,
                                                               fontWeight: FontWeight.w500,
-                                                              color: Theme.of(context).primaryColor
+                                                              color: Color.fromRGBO(236, 127, 25, 1)
                                                             ),
                                                           ),
                                                       ],

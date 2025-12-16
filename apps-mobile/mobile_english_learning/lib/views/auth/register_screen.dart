@@ -117,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: Color.fromRGBO(226, 133, 46, 100)),
         ),
       ),
     );
@@ -147,28 +147,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: <Widget> [
-
-          Container(
-            foregroundDecoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white.withValues(alpha: 0.5), const Color.fromARGB(255, 0, 85, 212).withValues(alpha: 0.8)],
-                ),
-              ),
-            child: Center(
-              child: 
-                   Image(
-                    image: AssetImage("assets/icons/logo-fix.png"),
-                    width: 320.0,
-                    height: 320.0,
-                    fit: BoxFit.fitHeight,
-                    )
-
-              ) 
-            ),
-
-
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(24.0),
@@ -188,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   fontSize: 22,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w200,
-                                  color: Theme.of(context).primaryColor,
+                                  color: Color.fromRGBO(196, 85, 0, 1),
                                 ),
                                 textAlign: TextAlign.center,
                               )
@@ -361,6 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: ElevatedButton(
                         onPressed: registerViewModel.isLoading ? null : _handleRegister,
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromRGBO(226, 133, 46, 100),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -377,7 +356,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       strokeWidth: 2,
                                       color: Theme.of(context).primaryColor,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+                                        Color.fromRGBO(226, 133, 46, 100),
                                       ),
                                     ),
                                   ),
@@ -394,6 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             : Text(
                                 'Create Account',
                                 style: TextStyle(
+                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -409,7 +389,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text(
                           'Already have an account? ',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.grey),
                         ),
                         TextButton(
                           onPressed: () {
@@ -419,7 +399,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Text(
                             'Sign In',
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor,
+                              color: Color.fromRGBO(211, 151, 0, 1),
                               fontWeight: FontWeight.w600,
                             ),
                           ),

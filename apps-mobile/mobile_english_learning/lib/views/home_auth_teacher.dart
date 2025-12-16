@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_english_learning/utils/hex_color_converter.dart';
 import 'package:mobile_english_learning/viewmodels/auth/app_state_view_models.dart';
+import 'package:mobile_english_learning/utils/formatingstring.dart';
 
 
 
@@ -47,9 +48,8 @@ class _homeTeacherScreenState extends State<HomeTeacherScreen>{
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(children:<Widget> [
-                    Image(width: 20.0,height: 20.0,image: AssetImage("assets/icons/brain.png"),color: Theme.of(context).primaryColor),
                     SizedBox(width: 10.0),
-                    Text("Brain Boost", style: TextStyle(fontFamily: 'Poppins',fontSize: 15.0,fontWeight: FontWeight.w500,color: Theme.of(context).primaryColor),),
+                    Text("Kuizu!", style: TextStyle(fontFamily: 'Poppins',fontSize: 15.0,fontWeight: FontWeight.w500,color: Color.fromRGBO(236, 127, 25, 1)),),
                   ],),
                     SingleChildScrollView(
                       child:
@@ -65,17 +65,17 @@ class _homeTeacherScreenState extends State<HomeTeacherScreen>{
                                 child: Row(
                                           children: [
                                             (authViewModel.user == null)
-                                            ? Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor,))
+                                            ? Center(child: CircularProgressIndicator(color: Color.fromRGBO(236, 127, 25, 1),))
                                                
                                             :
-                                                Icon(Icons.account_circle_outlined,color: Theme.of(context).primaryColor),
+                                                Icon(Icons.account_circle_outlined,color: Color.fromRGBO(56, 56, 56, 1)),
                                                 SizedBox(width: 8),
                                                 Text(
-                                                    "Hi, ${authViewModel.displayName}",
+                                                    "Hi, ${authViewModel.displayName.toTitleCase()}",
                                                     style: TextStyle(
                                                         fontSize: 14,
-                                                        fontWeight: FontWeight.w500,
-                                                        color: Theme.of(context).primaryColor
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Color.fromRGBO(56, 56, 56, 1)
                                                         ),
                                                 ),
                                             ],

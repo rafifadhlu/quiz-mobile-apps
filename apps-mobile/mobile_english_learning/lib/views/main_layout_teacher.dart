@@ -56,17 +56,7 @@ class _MainLayoutTeacherState extends State<MainLayoutTeacher> {
                   end: Alignment.bottomCenter,
                   colors: [Colors.white.withValues(alpha: 0.0), const Color.fromARGB(255, 0, 85, 212).withValues(alpha: 0.8)],
                 ),
-              ),
-            child: Center(
-              child: 
-                   Image(
-                    image: AssetImage("assets/icons/logo-fix.png"),
-                    width: 220.0,
-                    height: 220.0,
-                    fit: BoxFit.fitHeight,
-                    )
-
-              ) 
+              ), 
             ),  
             Container(
               color: Colors.transparent,
@@ -77,13 +67,15 @@ class _MainLayoutTeacherState extends State<MainLayoutTeacher> {
         
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        fixedColor: Colors.white,
+        backgroundColor: Color.fromRGBO(236, 127, 25, 1),
+        selectedItemColor: Colors.white,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+        unselectedItemColor: const Color.fromARGB(255, 224, 224, 224),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home,color: Colors.white),backgroundColor: Colors.white, label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person,color: Colors.white),backgroundColor: Colors.white, label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

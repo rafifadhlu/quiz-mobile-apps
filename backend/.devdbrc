@@ -2,5 +2,21 @@
   {
     "type": "sqlite",
     "path": "c:\\Users\\bodyn\\Documents\\gitloc\\mobile-apps-english\\backend\\api\\db.sqlite3"
+  },
+  {
+    "type": "sqlite",
+    "path": "c:\\data_annotator;C\\label_studio.sqlite3"
+  },
+  {
+    "type": "sqlite",
+    "path": "c:\\Users\\bodyn\\Documents\\Kuliah\\HMIF\\Keperluan Pribadi\\Kerja\\Berkas\\Internship\\label_studio.sqlite3"
+  },
+  {
+    "type": "sqlite",
+    "path": "c:\\Users\\bodyn\\Pictures\\data_annotator;C\\label_studio.sqlite3"
+  },
+  {
+    "type": "sqlite",
+    "path": "c:\\Users\\bodyn\\Downloads\\label_studio.sqlite3"
   }
 ]

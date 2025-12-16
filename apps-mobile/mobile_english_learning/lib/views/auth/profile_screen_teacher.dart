@@ -41,8 +41,7 @@ class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
     centerTitle: true,
     title: Column(
       children: [
-        Image(width: 20.0,height: 20.0,image: AssetImage("assets/icons/brain.png"),color: Theme.of(context).primaryColor),
-        Text("Brain Boost", style: TextStyle(fontFamily: 'Poppins',fontSize: 15.0,fontWeight: FontWeight.w500,color: Theme.of(context).primaryColor),)
+        Text("Kuizu!", style: TextStyle(fontFamily: 'Poppins',fontSize: 15.0,fontWeight: FontWeight.w500,color: Color.fromRGBO(236, 127, 25, 1)),)
       ],
     ),
     foregroundColor: Colors.white,
@@ -70,17 +69,18 @@ class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
                               color: Colors.grey,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
                           
                           // Username
                           Text(
-                            authViewModel.displayName,
+                            authViewModel.displayName.toUpperCase(),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
+                          const SizedBox(height: 10),
 
                           SizedBox(
                             width: 300.0,
@@ -97,14 +97,16 @@ class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
                               child: Row(
                                 children: <Widget> [
                                   Container(
-                                    padding: EdgeInsets.only(left: 10.0,right: 10.0),
+                                    padding: EdgeInsets.only(left: 15.0,right: 10.0),
                                     child: Row(
                                       children: [
                                           Icon(Icons.person,
                                           color: Colors.black,
-                                          size: 40.0,),
+                                          size: 25.0,),
+                                          const SizedBox(width: 10, height: 40,),
                                           Text("Profile",
                                           style: TextStyle(
+                                            fontSize: 15,
                                             color: Theme.of(context).primaryColor,
                                             fontWeight: FontWeight.w300,
                                             ),),                                  
