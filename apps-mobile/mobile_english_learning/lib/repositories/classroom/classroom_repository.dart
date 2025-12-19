@@ -117,6 +117,9 @@ class ClassroomRepository {
               'Authorization': 'Bearer $_token',
         });
 
+        debugPrint("THIS IS FUCKING FROM DETAILS : ${response.body}");
+        debugPrint("THIS IS FUCKING FROM DETAILS : ${GetDetailsClassroomResponse.fromJson(jsonDecode(response.body))}");
+
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         return GetDetailsClassroomResponse.fromJson(body);

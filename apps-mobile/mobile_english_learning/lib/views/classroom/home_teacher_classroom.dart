@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_english_learning/models/classroom_models.dart';
 import 'package:provider/provider.dart';
+import 'package:mobile_english_learning/utils/hex_color_converter.dart';
 
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
 import 'package:mobile_english_learning/viewmodels/classroom/classroom_views_models.dart';
@@ -37,10 +38,10 @@ class _ClassroomHomeTeacherState extends State<ClassroomHomeTeacher> {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 25,
             left: 16,
             right: 16,
-            top: 16,
+            top: 20,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -49,7 +50,7 @@ class _ClassroomHomeTeacherState extends State<ClassroomHomeTeacher> {
                 controller: _controller,
                 decoration: InputDecoration(
                   labelText: "Classroom Name",
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor)),
                 ),
               ),
               SizedBox(height: 10),
@@ -163,8 +164,8 @@ void _togleShowDelete(){
                 if (classes == null)
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Text('Lets Create your first classroom!', style: TextStyle(fontSize: 16.0, color: Theme.of(context).primaryColor),
+                      padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+                      child: Text('Lets Create your first classroom!', style: TextStyle(fontSize: 16.0, color: const Color.fromARGB(66, 0, 0, 0)),
                     ),
                   ))
                 else
@@ -247,15 +248,17 @@ void _togleShowDelete(){
               child: Row(
                 children: [
                   FloatingActionButton.small(
+                    backgroundColor: HexColor.fromHex('#ABE0F0'),
                     heroTag: "activated_addclas",
                     onPressed: _showAddClassroomForm,
-                    child: Icon(Icons.add, size: 20.0),
+                    child: Icon(Icons.add, size: 20.0,color: const Color.fromARGB(255, 78, 78, 78),),
                   ),
                   SizedBox(width: 8),
                   FloatingActionButton.small(
+                    backgroundColor: HexColor.fromHex('#ABE0F0'),
                     heroTag: "activated_deleteclassroom",
                     onPressed: _togleShowDelete,
-                    child: Icon(Icons.delete, size: 20.0),
+                    child: Icon(Icons.delete, size: 20.0,color: const Color.fromARGB(255, 75, 75, 75),),
                   ),
                 ],
               ),

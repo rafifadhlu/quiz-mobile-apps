@@ -99,7 +99,6 @@ class QuizViewModels extends ChangeNotifier{
       }
     }
 
-
     debugPrint("Loaded quizzes:}");
     notifyListeners();
 

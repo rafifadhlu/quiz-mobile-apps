@@ -27,6 +27,12 @@ class _MainLayoutState extends State<MainLayout> {
     ProfileScreen(),
   ];
 
+  final List<String> _titlePages = [
+    'Home',
+    'Classrooms',
+    'Profile',
+  ];
+
   @override
   void initState() {
     _selectedIndex = widget.indexNeeded;
@@ -42,6 +48,73 @@ class _MainLayoutState extends State<MainLayout> {
     final authViewModel = context.watch<AuthViewModel>();
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        toolbarHeight: 60.0,
+        elevation: 0, // Remove default shadow to clearly see your custom glow
+        titleSpacing: 0.0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: Container(
+            // color: Colors.black,
+            height: 0.5,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  blurRadius: 1.5,
+
+                )
+              ]
+            ),
+
+          ),
+        ),
+        title: Container(
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(5, 12, 5, 2),
+                  child:
+                  Text(
+                      "Kuizu!",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontFamily: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.fontFamily,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(236, 127, 25, 1),
+                      ),
+                    ) 
+                  ,
+                )
+                
+              ),
+
+              Expanded(
+                flex: 4,
+                child: Text(
+                  _titlePages[_selectedIndex],
+                  style: TextStyle(
+                    fontFamily: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.fontFamily,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Expanded(flex: 1, child: Text("")),
+            ],
+          ),
+        ),
+      ),
+
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         transitionBuilder: (child, animation) =>
@@ -54,25 +127,6 @@ class _MainLayoutState extends State<MainLayout> {
             ),
         child: Stack(
           children:<Widget> [
-          Container(
-            foregroundDecoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white.withValues(alpha: 0.0), const Color.fromARGB(255, 0, 85, 212).withValues(alpha: 0.8)],
-                ),
-              ),
-            child: Center(
-              child: 
-                   Image(
-                    image: AssetImage("assets/icons/logo-fix.png"),
-                    width: 220.0,
-                    height: 220.0,
-                    fit: BoxFit.fitHeight,
-                    )
-
-              ) 
-            ),  
             Container(
               color: Colors.transparent,
               child: _pages[_selectedIndex],
@@ -81,15 +135,26 @@ class _MainLayoutState extends State<MainLayout> {
         ) 
         
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.class_), label: "Classes"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(color: Colors.grey,blurRadius: 5.0),
+          ]
+        ),
+
+        child: 
+        BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.amber,
+            unselectedItemColor: Colors.grey,
+            onTap: _onItemTapped,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              BottomNavigationBarItem(icon: Icon(Icons.class_), label: "Classes"),
+              BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+            ],
+          ),
+      )
     );
   }
 }

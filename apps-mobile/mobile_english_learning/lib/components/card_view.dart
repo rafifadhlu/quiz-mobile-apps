@@ -41,7 +41,8 @@ class ClassCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
-              Text("Teacher: $teacher"),
+              Text("Teacher :"),
+              Text("$teacher",maxLines: 2,overflow: TextOverflow.clip,),
               const Spacer(),
 
               Container(

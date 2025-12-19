@@ -72,11 +72,23 @@ class _editProfileScreenState extends State<editProfileScreen>{
   return Scaffold(
     appBar: AppBar(
       title: Row(
-
         children: [
-          Text("Profile"),
+
+          Text("Edit"),
+
+          // Padding(
+          //   padding: EdgeInsetsGeometry.fromLTRB(10, 0, 15, 0),
+          //   child: Text("Edit"),
+          //   ),
+
+
+          
           TextButton(onPressed: handleEdit
-          , child: Text("Edit"),)
+          , child: Text("Edit",style: TextStyle(
+            color: Theme.of(context).primaryColor,
+          ),)
+          )
+
         ],
       ),
       leading:Builder(

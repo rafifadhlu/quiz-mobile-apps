@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = HexColor.fromHex("#102f74");
+    final Color primaryColor = HexColor.fromHex("#E2852E");
     
     return MaterialApp.router(
       routerConfig: Createrouters(authViewModel, appStateViewModel,classroomViewModel,quizViewModels),

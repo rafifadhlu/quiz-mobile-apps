@@ -107,7 +107,7 @@ class _ProfileScreenTeacherState extends State<ProfileScreenTeacher>{
                                           Text("Profile",
                                           style: TextStyle(
                                             fontSize: 15,
-                                            color: Theme.of(context).primaryColor,
+                                            color: Colors.black,
                                             fontWeight: FontWeight.w300,
                                             ),),                                  
                                       ],

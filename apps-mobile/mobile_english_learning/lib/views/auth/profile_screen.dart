@@ -36,12 +36,6 @@ class _ProfileScreenState extends State<ProfileScreen>{
     }
     // TODO: implement build
   return Scaffold(
-  appBar: AppBar(
-    title: const Text("Profile"),
-    backgroundColor: Colors.blueAccent,
-    foregroundColor: Colors.white,
-    elevation: 0,
-  ),
   body: SafeArea(
     child: SingleChildScrollView(
       child: Container(
@@ -99,8 +93,8 @@ class _ProfileScreenState extends State<ProfileScreen>{
                                           size: 40.0,),
                                           Text("Profile",
                                           style: TextStyle(
-                                            color: Theme.of(context).primaryColor,
-                                            fontWeight: FontWeight.w300,
+                                            color: const Color.fromARGB(96, 0, 0, 0),
+                                            fontWeight: FontWeight.w600,
                                             ),),                                  
                                       ],
                                     ),)

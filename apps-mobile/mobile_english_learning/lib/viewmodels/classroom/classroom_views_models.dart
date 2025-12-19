@@ -42,6 +42,7 @@ class ClassroomViewsModels extends ChangeNotifier{
       _isSuccess = false;
       notifyListeners();
     }finally{
+
       _isLoading = false;
       notifyListeners();
     }
@@ -57,6 +58,7 @@ class ClassroomViewsModels extends ChangeNotifier{
       final response = await _repository.getDetailClassroomsByid(id);
       _details = response;
       _isSuccess = true;
+      // debugPrint(response.data.first.students.first.studentFirstName);
       notifyListeners();   
     }catch(e){
       _errorMessage = e.toString();
@@ -75,8 +77,7 @@ Future<void> createClassroom(CreateClassroomRequest request)async {
 
      try{
       final response = await _repository.createClassroom(request);
-      _isSuccess = true;
-      debugPrint(response.className);
+      _isSuccess = true; 
 
       if (_classes != null) {
       _classes!.data.add(response); // assuming classes.data is List<ClassroomData>
