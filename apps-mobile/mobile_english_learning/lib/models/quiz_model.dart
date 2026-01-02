@@ -268,27 +268,35 @@ class QuestionRequest {
 
 
 
-class choiceDataRequest{
+class choiceDataRequest {
+  final int? id;  // Add this
   final String choice_text;
   final bool is_correct;
 
   choiceDataRequest({
+    this.id,  // Add this
     required this.choice_text,
     required this.is_correct
   });
 
   factory choiceDataRequest.fromJson(Map<String, dynamic> json) {
     return choiceDataRequest(
+      id: json['id'],  // Add this
       choice_text: json['choice_text'],
       is_correct: json['is_correct']
     );
   }
 
-
-  Map<String, dynamic> toJson() => {
-        "choice_text": choice_text,
-        "is_correct": is_correct,
-      };
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'choice_text': choice_text,
+      'is_correct': is_correct,
+    };
+    if (id != null) {
+      map['id'] = id;  // Include ID only if it exists
+    }
+    return map;
+  }
 }
 
 
@@ -347,6 +355,9 @@ class QuestionData {
     return data;
   }
 }
+
+
+
 
 
 

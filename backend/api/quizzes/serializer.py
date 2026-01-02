@@ -1,4 +1,5 @@
 from operator import index
+import os
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import quizzes,questions,choices,student_answers,QuizAttempt
@@ -33,9 +34,44 @@ class QuestionsSerializer(serializers.ModelSerializer):
         model = questions
         fields = ["id","quiz_id","question_text","question_audio","question_image","question_audio_url","question_image_url", "choices", "choices_list"]
 
+    def to_internal_value(self, data):
+        import json
+        from collections import OrderedDict
+        
+        print(f"========== to_internal_value ==========")
+        print(f"Raw data type: {type(data)}")
+        
+        # ✅ Convert QueryDict to regular dict FIRST
+        if hasattr(data, 'dict'):
+            data = data.dict()  # Convert QueryDict to dict
+            print(f"Converted to dict")
+        
+        # If choices comes as a JSON string, parse it
+        if 'choices' in data and isinstance(data.get('choices'), str):
+            try:
+                data['choices'] = json.loads(data['choices'])
+                print(f"✅ Parsed choices: {data['choices']}")
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({'choices': f'Invalid JSON: {str(e)}'})
+        
+        print(f"Data before super(): {data.keys()}")
+        result = super().to_internal_value(data)
+        print(f"After super().to_internal_value, keys: {result.keys()}")
+        print(f"======================================")
+        return result
+    
+    def validate_choices(self, value):
+        print(f"========== validate_choices called ==========")
+        print(f"Choices value: {value}")
+        print(f"Choices type: {type(value)}")
+        print("=============================================")
+        return value
+
+
     # for get request
     def get_question_image_url(self, obj):
-        signed_map = self.context.get('signed_url_map', {})
+        context = self.context or {}
+        signed_map = context.get('signed_url_map', {})
         return signed_map.get(obj.question_image.name) if obj.question_image else None
 
     def get_question_audio_url(self, obj):
@@ -51,44 +87,102 @@ class QuestionsSerializer(serializers.ModelSerializer):
     
     # for incoming files validation
     def validate_question_image(self, value):
-        if value and value.content_type not in ['image/jpeg', 'image/png']:
+        if not value:
+            return None
+        content_type = getattr(value, "content_type", None)
+        if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
             raise serializers.ValidationError("Only JPG and PNG images are allowed.")
         return value
 
     def validate_question_audio(self, value):
-        if value and value.content_type not in ['audio/mpeg', 'audio/wav']:
-            raise serializers.ValidationError("Only MP3 and WAV audio files are allowed.")
+        if not value:
+            return None  
+
+        content_type = getattr(value, "content_type", None)
+        ext = os.path.splitext(value.name)[1].lower()
+
+        allowed_types = {
+            "audio/mpeg", "audio/mp3",
+            "audio/wav", "audio/x-wav",
+            "audio/aac", "audio/mp4",
+            "application/octet-stream",  # some clients send this
+        }
+
+        allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
+
+        if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
+            raise serializers.ValidationError(f"Only audio files are allowed. Got {content_type} / {ext}")
+        
         return value
+
+
     
     def update(self, instance, validated_data):
-        # Update question fields
+        # ✅ ADD DEBUG (remove after testing)
+        print(f"========== UPDATE METHOD ==========")
+        print(f"validated_data keys: {validated_data.keys()}")
+        
         instance.question_text = validated_data.get("question_text", instance.question_text)
         instance.question_image = validated_data.get("question_image", instance.question_image)
         instance.question_audio = validated_data.get("question_audio", instance.question_audio)
 
-        # Handle choices
         choices_data = validated_data.pop("choices", None)
+        
+        # ✅ ADD DEBUG
+        print(f"choices_data: {choices_data}")
+        print(f"Number of choices: {len(choices_data) if choices_data else 0}")
+        
         if choices_data is not None:
             existing_ids = [c.id for c in instance.choices_set.all()]
-            sent_ids = [c.get("id") for c in choices_data if "id" in c]
+            sent_ids = [c.get("id") for c in choices_data if c.get("id") is not None]
+
+            print(f"Existing IDs in DB: {existing_ids}")
+            print(f"Sent IDs from client: {sent_ids}")
 
             # Delete removed choices
             for choice_id in existing_ids:
                 if choice_id not in sent_ids:
+                    print(f"Deleting choice {choice_id}")
                     instance.choices_set.filter(id=choice_id).delete()
 
             # Update or create
             for c_item in choices_data:
-                if "id" in c_item:
-                    choice_instance = instance.choices_set.get(id=c_item["id"])
-                    choice_instance.choice_text = c_item.get("choice_text", choice_instance.choice_text)
-                    choice_instance.is_correct = c_item.get("is_correct", choice_instance.is_correct)
-                    choice_instance.save()
-                else:
-                    choices.objects.create(question=instance, **c_item)
+                choice_id = c_item.get("id", None)
+                choice_text = c_item.get("choice_text")
+                is_correct = c_item.get("is_correct")
+                
+                print(f"Processing: id={choice_id}, text='{choice_text}', correct={is_correct}")
+
+                if choice_id is not None:  # update existing
+                    try:
+                        choice_instance = instance.choices_set.get(id=choice_id)
+                        choice_instance.choice_text = choice_text
+                        choice_instance.is_correct = is_correct
+                        choice_instance.save()
+                        print(f"  ✅ Updated choice {choice_id}")
+                    except instance.choices_set.model.DoesNotExist:
+                        new_choice = instance.choices_set.create(
+                            choice_text=choice_text,
+                            is_correct=is_correct if is_correct is not None else False
+                        )
+                        print(f"  ✅ Created choice {new_choice.id} (ID didn't exist)")
+                else:  # new choice
+                    new_choice = instance.choices_set.create(
+                        choice_text=choice_text,
+                        is_correct=is_correct if is_correct is not None else False
+                    )
+                    print(f"  ✅ Created NEW choice {new_choice.id}")
 
         instance.save()
+        
+        # ✅ FINAL DEBUG
+        print(f"Final choices in DB:")
+        for choice in instance.choices_set.all():
+            print(f"  ID:{choice.id} | Text:'{choice.choice_text}' | Correct:{choice.is_correct}")
+        print(f"===================================")
+        
         return instance
+
  
         
     
@@ -100,6 +194,7 @@ class UserQuestionsSerializer(serializers.Serializer):
     audio_files = serializers.ListField(
         child=serializers.FileField(), required=False, write_only=True
     )
+    
 
     def validate_questions(self, value):
         if not value:
@@ -127,14 +222,64 @@ class UserQuestionsSerializer(serializers.Serializer):
                 raise serializers.ValidationError(f"Invalid question data: {question_serializer.errors}")
         
         return validated_questions
+    
+    # for incoming files validation
+    def validate_images_files(self, value):
+        if not value:  # no files uploaded
+            return None
+        
+        # value is a list of files
+        for file in value:
+            if not file:
+                continue
+            content_type = getattr(file, "content_type", None)
+            if not content_type or content_type.lower() not in {"image/jpeg", "image/png"}:
+                raise serializers.ValidationError(f"Invalid image type: {content_type}. Only JPG and PNG are allowed.")
+        return value
+
+
+    def validate_audio_files(self, value):
+            if not value:  # no files uploaded
+                return None  
+
+            allowed_types = {
+                "audio/mpeg", "audio/mp3",
+                "audio/wav", "audio/x-wav",
+                "audio/aac", "audio/mp4",
+                "application/octet-stream",  # some clients send this
+            }
+            allowed_exts = {".mp3", ".wav", ".aac", ".m4a"}
+
+            # value is a list of files
+            for file in value:
+                if not file:
+                    continue
+                content_type = getattr(file, "content_type", None)
+                ext = os.path.splitext(file.name)[1].lower()
+
+                if (not content_type or content_type.lower() not in allowed_types) and ext not in allowed_exts:
+                    raise serializers.ValidationError(
+                        f"Invalid audio type: {content_type} / {ext}. Only MP3, WAV, AAC, M4A are allowed."
+                    )
+            return value
+
 
     def create(self, validated_data):
         quiz_id = self.context.get("quiz_id")
         quiz_instance = quizzes.objects.get(id=quiz_id)
         request = self.context.get("request")
 
-        image_from_field = validated_data.pop("images_files",[])
-        audio_from_field = validated_data.pop("audio_files",[])
+        # Instead of compacted list, read raw files with their indices
+        image_files = {}
+        audio_files = {}
+
+        for key, file in request.FILES.items():
+            if key.startswith("images_files["):
+                index = int(key[len("images_files["):-1])  # extract index from "images_files[3]"
+                image_files[index] = file
+            elif key.startswith("audio_files["):
+                index = int(key[len("audio_files["):-1])
+                audio_files[index] = file
 
         created_questions = []
         questions_data = validated_data["questions"]
@@ -142,12 +287,12 @@ class UserQuestionsSerializer(serializers.Serializer):
         for index, q_item in enumerate(questions_data):
             choices_data = q_item.pop("choices", [])
 
-            if index < len(image_from_field) and image_from_field[index]:
-                q_item["question_image"] = image_from_field[index]
+            if index in image_files:
+                q_item["question_image"] = image_files[index]
 
-            if index < len(audio_from_field) and audio_from_field[index]:
-                q_item["question_audio"] = audio_from_field[index] 
-            
+            if index in audio_files:
+                q_item["question_audio"] = audio_files[index]
+
             question_instance = questions.objects.create(
                 quiz=quiz_instance, **q_item
             )
@@ -158,6 +303,7 @@ class UserQuestionsSerializer(serializers.Serializer):
             created_questions.append(question_instance)
 
         return created_questions
+
     
 
 class UserSubmitAnswerSerializer(serializers.ModelSerializer):

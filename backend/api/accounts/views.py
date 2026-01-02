@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 
 
-from .serializers import UserCreateSerializer,UserAuthSerializer,UserRefreshTokenSerializer, UserUpdateSerializer 
+from .serializers import UserCreateSerializer,UserAuthSerializer,UserRefreshTokenSerializer, UserUpdateSerializer,UserCreateTeacherSerializer
 
 
 class UserViewSet(CreateAPIView):
@@ -94,7 +94,28 @@ class UserCreateView(CreateAPIView):
                             })
         return Response(status=status.HTTP_400_BAD_REQUEST,
                         data=serializer.errors)
-    
+
+class UserCreateTeacherView(CreateAPIView):
+
+    """
+    API endpoint for teacher registration.
+    """
+    serializer_class = UserCreateTeacherSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(status=status.HTTP_201_CREATED,
+                            data={
+                                "status": status.HTTP_201_CREATED,
+                                "message": "User created successfully",
+                                "user": serializer.data
+                            })
+        return Response(status=status.HTTP_400_BAD_REQUEST,
+                        data=serializer.errors)
+
+
 class UserBlackListTokenView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
