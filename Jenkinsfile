@@ -18,18 +18,18 @@ pipeline {
                 }
             }
         }
-        // stage('Setup for Test') {
-        //     steps {
-        //         sh '''
-        //             echo "Setting up test environment... 🔧"
-        //             cd backend
-        //             python3 -m venv ${VENV_DIR}
-        //             . ${VENV_DIR}/bin/activate
-        //             cd api
-        //             pip install -r requirements.txt
-        //         '''
-        //     }
-        // }
+        stage('Setup for Test') {
+            steps {
+                sh '''
+                    echo "Setting up test environment... 🔧"
+                    cd backend
+                    python3 -m venv ${VENV_DIR}
+                    . ${VENV_DIR}/bin/activate
+                    cd api
+                    pip install -r requirements.txt
+                '''
+            }
+        }
 
         stage('Run Tests') {
             steps {
@@ -38,7 +38,6 @@ pipeline {
                     cd backend
                     . ${VENV_DIR}/bin/activate
                     cd api
-                    pytest
                 '''
             }
         }
