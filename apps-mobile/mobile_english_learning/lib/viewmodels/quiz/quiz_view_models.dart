@@ -123,7 +123,7 @@ class QuizViewModels extends ChangeNotifier{
       final response = await _repository.getAllQuestionsofQuiz(classroomID,quizID);
       _questions = response;
       _isSuccess = true;
-      // debugPrint(_quizzes as String?);
+      debugPrint("Loaded questions: ${_questions!.data.toString()}");
       notifyListeners();   
     }catch(e){
       _errorMessage = e.toString();

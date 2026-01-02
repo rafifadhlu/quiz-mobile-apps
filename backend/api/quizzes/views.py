@@ -186,9 +186,27 @@ class UserUpdateQuestions(RetrieveUpdateAPIView):
         return context
 
     def update(self, request, *args, **kwargs):
+        import json
+        
+        # ✅ DEBUG
+        print("========== VIEW DEBUG ==========")
+        print(f"request.data keys: {request.data.keys()}")
+        print(f"request.POST keys: {request.POST.keys()}")
+        print(f"request.FILES keys: {request.FILES.keys()}")
+        
+        # ✅ FIX: Merge request.data with request.POST (for multipart form fields)
+        data = request.data.copy()
+        
+        # If choices is in POST but not in data, add it
+        if 'choices' in request.POST and 'choices' not in data:
+            data['choices'] = json.loads(request.POST['choices'])
+            print(f"✅ Added choices from POST: {data['choices']}")
+        
+        print("================================")
+        
         serializer = self.get_serializer(
             instance=self.get_object(),
-            data=request.data,
+            data=data,  # ✅ Use modified data
             partial=True
         )
 

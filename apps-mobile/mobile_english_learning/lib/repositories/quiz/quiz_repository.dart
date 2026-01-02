@@ -10,8 +10,9 @@ import 'package:mobile_english_learning/models/quiz_model.dart';
 
 
 class QuizRepository {
-  // static const String baseUrl = '10.0.2.2:8000';
-  static const String baseUrl = '192.168.1.9:8000';
+  // static const String baseUrl = '10.0.2.2:8000'; //emulator
+  // static const String baseUrl = '192.168.1.9:8000'; //wifi
+  static const String baseUrl = '203.83.46.48:40700'; //public
 
   Future<Quizesdata> CreateNewQuiz(quizzezRequest request,int classroomID) async{
     final url = Uri.http(baseUrl, 'api/v1/classrooms/${classroomID}/quizzes/');
@@ -99,6 +100,9 @@ class QuizRepository {
               'Authorization': 'Bearer $_token',
         });
 
+      debugPrint("Raw response body: ${response.body}");
+
+
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
         debugPrint("Status code : ${response.body}");
@@ -124,6 +128,9 @@ class QuizRepository {
         }
         throw Exception('Unauthorized: Token expired and refresh failed');
       } else {
+        final body = jsonDecode(response.body);
+        debugPrint("Status code : ${response.body}");
+        debugPrint("Status code : ${getQuizzesResponse.fromJson(body)}");
         throw Exception('Failed to fetch classrooms. Code: ${response.statusCode}');
       }
   }
@@ -133,6 +140,9 @@ class QuizRepository {
       final _token = await SharedPrefUtils.readPrefStr('access_token');
 
       debugPrint("Hit url.........");
+
+      debugPrint("classroomID : ${classroomId} , quizID : ${quizID} ");
+
       final response = await http.get(url,
       headers: {
               'Content-Type': 'application/json',
@@ -140,11 +150,13 @@ class QuizRepository {
       });
 
       if (response.statusCode == 200) {
+        debugPrint("Raw response: ${response.body}");
         final body = jsonDecode(response.body);
-        debugPrint(body.toString());
         return getQuestionsResponse.fromJson(body);
-      } else if (response.statusCode == 401) {
+      }
+        else if (response.statusCode == 401) {
         // token expired → try refresh
+        debugPrint('got 401');
         final newToken = await UserRepository().getNewAccessToken();
         if (newToken != null) {
           // retry the original request
@@ -396,48 +408,59 @@ class QuizRepository {
   }
 
   Future<QuestionData?> updateQuestion({
-    required int classroomId,
-    required int quizId,
-    required int questionId,
-    required QuestionData question,
-    File? imageFile,
-    File? audioFile,
-  }) async {
-    var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizId/questions/$questionId');
-    final _token = await SharedPrefUtils.readPrefStr('access_token');
+      required int classroomId,
+      required int quizId,
+      required int questionId,
+      required QuestionData question,
+      File? imageFile,
+      File? audioFile,
+    }) async {
+      var url = Uri.http(baseUrl, 'api/v1/classrooms/$classroomId/quizzes/$quizId/questions/$questionId');
+      final _token = await SharedPrefUtils.readPrefStr('access_token');
 
-    try {
-      // ✅ Prepare multipart request for image/audio
-      var request = http.MultipartRequest('PUT', url);
+      debugPrint('Updating question at: $url');
+      debugPrint('Has image: ${imageFile != null}');
+      debugPrint('Has audio: ${audioFile != null}');
 
-      request.headers.addAll({
-        'Authorization': 'Bearer $_token'
-      });
+      try {
+        var request = http.MultipartRequest('PUT', url);
 
-      request.fields['question_text'] = question.question_text;
-      request.fields['choices'] = jsonEncode(question.choices.map((c) => c.toJson()).toList());
+        request.headers.addAll({
+          'Authorization': 'Bearer $_token'
+        });
 
-      if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('question_image', imageFile.path));
+        request.fields['question_text'] = question.question_text;
+        request.fields['choices'] = jsonEncode(question.choices.map((c) => c.toJson()).toList());
+
+        if (imageFile != null) {
+          request.files.add(await http.MultipartFile.fromPath('question_image', imageFile.path));
+        }
+
+        if (audioFile != null) {
+          request.files.add(await http.MultipartFile.fromPath('question_audio', audioFile.path));
+        }
+
+        debugPrint('Sending request...');
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+
+        debugPrint('JSON being sent: ${request.fields['choices']}');
+        debugPrint('Response status: ${response.statusCode}');
+        debugPrint('Response body: $responseBody');
+        debugPrint('Response reason: ${response.reasonPhrase}');
+
+        if (response.statusCode == 200) {
+          final jsonData = jsonDecode(responseBody);
+          return QuestionData.fromJson(jsonData['data']);
+        } else {
+          debugPrint('ERROR: Failed with status ${response.statusCode}');
+          throw Exception('Failed to update question: ${response.statusCode} - $responseBody');
+        }
+      } catch (e) {
+        debugPrint('CAUGHT ERROR: $e');
+        rethrow; // Don't swallow the error
       }
-
-      if (audioFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('question_audio', audioFile.path));
-      }
-
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
-
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(responseBody);
-        return QuestionData.fromJson(jsonData['data']);
-      } else {
-        throw Exception('Failed to update question: ${response.statusCode} ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      throw Exception("Error updating question: $e");
     }
-  }
 
   
 

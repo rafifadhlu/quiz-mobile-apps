@@ -211,7 +211,7 @@ class _ClassroomTeacherLayoutState extends State<ClassroomTeacherLayout> {
     if (classroom.data.isEmpty) {
       return Scaffold(
         body: const Center(
-          child: Text("You have not joined class yet"),
+          child: Text("You have not created class yet"),
         ),
       );
     }
