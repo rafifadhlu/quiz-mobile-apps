@@ -18,32 +18,29 @@ pipeline {
                 }
             }
         }
-        
-        stage('Setup') {
+        stage('Setup for Test') {
             steps {
                 sh '''
-                    echo "Setting up the environment... 🔧🔧🔧"
+                    echo "Setting up test environment... 🔧"
                     cd backend
                     python3 -m venv ${VENV_DIR}
                     . ${VENV_DIR}/bin/activate
                     cd api
                     pip install -r requirements.txt
-                    echo "Environment setup success and complete ✅✅✅"
                 '''
             }
         }
 
-        // stage('Test') {
-        //     steps {
-        //         sh '''
-        //             echo "Running tests... 🔍🔍🔍"
-        //             cd backend
-        //             . ${VENV_DIR}/bin/activate
-        //             cd api
-        //             pytest
-        //         '''
-        //     }
-        // }
+        stage('Run Tests') {
+            steps {
+                sh '''
+                    echo "Running tests... 🔍"
+                    cd backend
+                    . ${VENV_DIR}/bin/activate
+                    cd api
+                '''
+            }
+        }
 
         stage('Deploy') {
             when {
